@@ -3,12 +3,12 @@
     ng-switch="$ctrl.widget.getQueryResult().getStatus()" ng-attr-data-refreshing="{{ $ctrl.widget.loading && !!$ctrl.widget.getQueryResult().getStatus() }}">
     <div class="body-row widget-header">
       <div class="t-header widget clearfix">
-        <div class="dropdown pull-right widget-menu-remove"  ng-if="!$ctrl.public && $ctrl.dashboard.canEdit()">
+        <div class="dropdown pull-right widget-menu-remove"  ng-if="$ctrl.dashboard.canEdit()">
           <div class="actions">
             <a ng-click="$ctrl.deleteWidget()" title="Remove From Dashboard"><i class="zmdi zmdi-close"></i></a>
           </div>
         </div>
-        <div class="dropdown pull-right widget-menu-regular" 
+        <div class="dropdown pull-right widget-menu-regular"
           uib-dropdown dropdown-append-to-body="true"
         >
           <div class="actions">
