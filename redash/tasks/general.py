@@ -56,8 +56,8 @@ def send_mail(to, subject, html, text):
                           body=text)
 
         mail.send(message)
-    except Exception:
-        logger.exception('Failed sending message: %s', message.subject)
+    except Exception as e:
+        logger.exception('Failed sending message with error: %s', str(e))
 
 
 @celery.task(
