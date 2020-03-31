@@ -81,6 +81,7 @@ export function prepareColumns(columns, searchInput, orderBy, onOrderByChange) {
       // based on row index
       dataIndex: null,
       align: column.alignContent,
+      width: column.width,
       title: (
         <React.Fragment>
           <Tooltip placement="top" title={column.title}>

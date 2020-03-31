@@ -9,7 +9,17 @@
   }
 
   .ant-table {
-    overflow-x: auto;
+    overflow-x: hidden;
+  }
+
+  .ant-table-body {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .ant-table-fixed-header .ant-table-scroll .ant-table-header {
+    overflow: hidden;
   }
 
   table {
@@ -103,7 +113,7 @@
 
   /* START table x scroll */
   .dashboard-widget-wrapper:not(.widget-auto-height-enabled) & {
-    position: absolute;
+    // position: absolute;
     left: 0;
     top: 0;
     width: 100%;

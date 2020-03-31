@@ -61,11 +61,11 @@ export default function Renderer({ options, data, context }) {
   return (
     <div className="table-visualization-container">
       <Table
-        data-percy="show-scrollbars"
         data-test="TableVisualization"
         columns={tableColumns}
         dataSource={preparedRows}
         rowKey={(record, index) => rowKeyPrefix + index}
+        useFixedHeader
         pagination={{
           size: context === 'widget' ? 'small' : '',
           position: 'bottom',
