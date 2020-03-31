@@ -54,6 +54,7 @@ from redash.handlers.visualizations import (VisualizationListResource,
 from redash.handlers.widgets import WidgetListResource, WidgetResource
 from redash.utils import json_dumps
 
+from redash.handlers.pdf import DashboardPdfDownload
 
 class ApiExt(Api):
     def add_org_resource(self, resource, *urls, **kwargs):
@@ -161,3 +162,5 @@ api.add_org_resource(QuerySnippetResource, '/api/query_snippets/<snippet_id>', e
 api.add_org_resource(QuerySnippetListResource, '/api/query_snippets', endpoint='query_snippets')
 
 api.add_org_resource(OrganizationSettings, '/api/settings/organization', endpoint='organization_settings')
+
+api.add_org_resource(DashboardPdfDownload, '/api/dashboards/<dashboard_slug>/pdf', endpoint='dashboard_pdf_download')
