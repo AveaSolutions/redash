@@ -2,7 +2,7 @@
 
 .dashboard-wrapper {
   flex-grow: 1;
-  margin-bottom: 85px;
+  margin-bottom: 5px;
 
   .layout {
     margin: -15px -15px 0;
@@ -16,8 +16,7 @@
     right: 0;
     bottom: 0;
     width: auto;
-    height: auto;
-    overflow: hidden;
+    height: inherit;
     margin: 0;
     padding: 0;
   }
@@ -25,6 +24,7 @@
   .pivot-table-renderer > table,
   visualization-renderer > .visualization-renderer-wrapper {
     overflow: visible;
+    height: inherit;
   }
 
   &.preview-mode {
@@ -48,13 +48,22 @@
       position: absolute;
       top: 0;
       left: 0;
-      bottom: 85px;
+      bottom: 5px;
       right: 15px;
       background: linear-gradient(to bottom, transparent, transparent 2px, #F6F8F9 2px, #F6F8F9 5px), linear-gradient(to left, #B3BABF, #B3BABF 1px, transparent 1px, transparent);
       background-size: calc((100vw - 15px) / 6) 5px;
       background-position: -7px 1px;
     }
   }
+
+  dashboard-widget {
+    height: inherit;
+  }
+
+  .widget-wrapper {
+    height: inherit;
+  }
+
 
   .dashboard-widget-wrapper:not(.widget-auto-height-enabled) {
     visualization-renderer {
@@ -65,6 +74,9 @@
       top: 0;
       right: 0;
       bottom: 0;
+      height: calc(100% - 40px);
+
+
 
       > .visualization-renderer-wrapper {
         flex-grow: 1;
@@ -74,6 +86,11 @@
       > .filters-wrapper {
         flex-grow: 0;
       }
+    }
+
+    .ant-table-content {
+      display: flex;
+      flex-direction: column;
     }
 
     .sunburst-visualization-container,
