@@ -51,7 +51,7 @@
     <div ng-switch-when="failed" class="body-row-auto scrollbox">
       <div class="alert alert-danger m-5" ng-show="$ctrl.widget.getQueryResult().getError()">Error running query: <strong>{{$ctrl.widget.getQueryResult().getError()}}</strong></div>
     </div>
-    <div ng-switch-when="done" class="body-row-auto scrollbox">
+    <div ng-switch-when="done" class="body-row-auto">
       <visualization-renderer class="t-body" ng-if="!$ctrl.widget.getQueryResult().isEmpty()"
         visualization="$ctrl.widget.visualization"
         query-result="$ctrl.widget.getQueryResult()"
@@ -60,7 +60,7 @@
       <div class="text-center" ng-if="$ctrl.widget.getQueryResult().isEmpty()">
         <h1><span class="zmdi zmdi-alert-circle-o"></span></h1>
         <p class="text-muted">
-          No results were returned for this query. 
+          No results were returned for this query.
         </p>
       </div>
     </div>

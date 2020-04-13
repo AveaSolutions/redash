@@ -1,5 +1,13 @@
 @import (reference, less) "~@/assets/less/ant.less";
 
+.inhert-height {
+  height: inherit;
+}
+
+.ant-table-header {
+  height: auto !important;
+}
+
 .table-visualization-container {
   .ant-pagination.ant-table-pagination {
     float: none;
@@ -9,7 +17,21 @@
   }
 
   .ant-table {
-    overflow-x: auto;
+    overflow-x: hidden;
+  }
+
+  .ant-table-body {
+    overflow-x: hidden;
+    overflow-y: scroll;
+  }
+
+  .ant-table-content {
+    display: flex;
+    flex-direction: column;
+
+    table {
+      table-layout: fixed;
+    }
   }
 
   table {
@@ -103,7 +125,7 @@
 
   /* START table x scroll */
   .dashboard-widget-wrapper:not(.widget-auto-height-enabled) & {
-    position: absolute;
+    // position: absolute;
     left: 0;
     top: 0;
     width: 100%;
