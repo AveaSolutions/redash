@@ -4,6 +4,10 @@
   height: inherit;
 }
 
+.ant-table-header {
+  height: auto !important;
+}
+
 .table-visualization-container {
   .ant-pagination.ant-table-pagination {
     float: none;
@@ -21,12 +25,13 @@
     overflow-y: scroll;
   }
 
-  .ant-table-header {
-    height: auto;
-  }
+  .ant-table-content {
+    display: flex;
+    flex-direction: column;
 
-  .ant-table-fixed-header .ant-table-scroll .ant-table-header {
-    overflow: hidden;
+    table {
+      table-layout: fixed;
+    }
   }
 
   table {
