@@ -1,5 +1,5 @@
 <div class="widget-wrapper">
-  <div class="tile body-container widget-visualization" ng-if="$ctrl.type=='visualization'" ng-class="$ctrl.type"
+  <div class="tile body-container widget-visualization" ng-if="$ctrl.type=='visualization'" ng-class="[$ctrl.type, $ctrl.widget.visualization.type]"
     ng-switch="$ctrl.widget.getQueryResult().getStatus()" ng-attr-data-refreshing="{{ $ctrl.widget.loading && !!$ctrl.widget.getQueryResult().getStatus() }}">
     <div class="body-row widget-header">
       <div class="t-header widget clearfix">
