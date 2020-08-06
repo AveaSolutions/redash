@@ -1,5 +1,6 @@
 import datetime
 from redash.query_runner import (
+    NotSupported,
     register,
     BaseSQLQueryRunner,
     TYPE_STRING,
@@ -9,7 +10,7 @@ from redash.query_runner import (
     TYPE_INTEGER,
     TYPE_FLOAT,
 )
-from redash.utils import json_dumps
+from redash.utils import json_dumps, json_loads
 from redash import __version__
 
 try:
@@ -55,7 +56,6 @@ class Databricks(BaseSQLQueryRunner):
                 "http_path": {"type": "string", "title": "HTTP Path"},
                 # We're using `http_password` here for legacy reasons
                 "http_password": {"type": "string", "title": "Access Token"},
-                "schemas": {"type": "string", "title": "Schemas to Load Metadata For"},
             },
             "order": ["host", "http_path", "http_password"],
             "secret": ["http_password"],
@@ -129,25 +129,64 @@ class Databricks(BaseSQLQueryRunner):
 
         return json_data, error
 
-    def _get_tables(self, schema):
+    def get_schema(self):
+        raise NotSupported()
+
+    def get_databases(self):
+        query = "SHOW DATABASES"
+        results, error = self.run_query(query, None)
+
+        if error is not None:
+            raise Exception("Failed getting schema.")
+
+        results = json_loads(results)
+
+        first_column_name = results["columns"][0]["name"]
+        return [row[first_column_name] for row in results["rows"]]
+
+    def get_database_tables(self, database_name):
+        schema = {}
         cursor = self._get_cursor()
 
-        schemas = self.configuration.get(
-            "schemas", self.configuration.get("database", "")
-        ).split(",")
+        cursor.tables(schema=database_name)
 
-        for schema_name in schemas:
-            cursor.columns(schema=schema_name)
+        for table in cursor:
+            table_name = "{}.{}".format(table[1], table[2])
 
-            for column in cursor:
-                table_name = "{}.{}".format(column[1], column[2])
-
-                if table_name not in schema:
-                    schema[table_name] = {"name": table_name, "columns": []}
-
-                schema[table_name]["columns"].append(column[3])
+            if table_name not in schema:
+                schema[table_name] = {"name": table_name, "columns": []}
 
         return list(schema.values())
+
+    def get_database_tables_with_columns(self, database_name):
+        schema = {}
+        cursor = self._get_cursor()
+
+        # load tables first, otherwise tables without columns are not showed
+        cursor.tables(schema=database_name)
+
+        for table in cursor:
+            table_name = "{}.{}".format(table[1], table[2])
+
+            if table_name not in schema:
+                schema[table_name] = {"name": table_name, "columns": []}
+
+        cursor.columns(schema=database_name)
+
+        for column in cursor:
+            table_name = "{}.{}".format(column[1], column[2])
+
+            if table_name not in schema:
+                schema[table_name] = {"name": table_name, "columns": []}
+
+            schema[table_name]["columns"].append({"name": column[3], "type": column[5]})
+
+        return list(schema.values())
+
+    def get_table_columns(self, database_name, table_name):
+        cursor = self._get_cursor()
+        cursor.columns(schema=database_name, table=table_name)
+        return [{"name": column[3], "type": column[5]} for column in cursor]
 
 
 register(Databricks)
