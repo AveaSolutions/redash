@@ -32,36 +32,51 @@ Redash features:
 Redash supports more than 35 SQL and NoSQL [data sources](https://redash.io/help/data-sources/supported-data-sources). It can also be extended to support more. Below is a list of built-in sources:
 
 - Amazon Athena
+- Amazon CloudWatch / Insights
 - Amazon DynamoDB
 - Amazon Redshift
+- ArangoDB
 - Axibase Time Series Database
-- Cassandra
+- Apache Cassandra
 - ClickHouse
 - CockroachDB
+- Couchbase
 - CSV
-- Databricks (Apache Spark)
+- Databricks
 - DB2 by IBM
-- Druid
+- Dgraph
+- Apache Drill
+- Apache Druid
+- Eccenca Corporate Memory
 - Elasticsearch
+- Exasol
+- Microsoft Excel
+- Firebolt
+- Databend
 - Google Analytics
 - Google BigQuery
 - Google Spreadsheets
 - Graphite
 - Greenplum
-- Hive
-- Impala
+- Apache Hive
+- Apache Impala
 - InfluxDB
-- JIRA
+- IBM Netezza Performance Server
+- JIRA (JQL)
 - JSON
 - Apache Kylin
 - OmniSciDB (Formerly MapD)
+- MariaDB
 - MemSQL
 - Microsoft Azure Data Warehouse / Synapse
 - Microsoft Azure SQL Database
+- Microsoft Azure Data Explorer / Kusto
 - Microsoft SQL Server
 - MongoDB
 - MySQL
 - Oracle
+- Apache Phoenix
+- Apache Pinot
 - PostgreSQL
 - Presto
 - Prometheus
@@ -72,8 +87,12 @@ Redash supports more than 35 SQL and NoSQL [data sources](https://redash.io/help
 - ScyllaDB
 - Shell Scripts
 - Snowflake
+- SPARQL
 - SQLite
+- TiDB
 - TreasureData
+- Trino
+- Uptycs
 - Vertica
 - Yandex AppMetrrica
 - Yandex Metrica
@@ -81,7 +100,7 @@ Redash supports more than 35 SQL and NoSQL [data sources](https://redash.io/help
 ## Getting Help
 
 * Issues: https://github.com/getredash/redash/issues
-* Discussion Forum: https://discuss.redash.io/
+* Discussion Forum: https://github.com/getredash/redash/discussions/
 
 ## Reporting Bugs and Contributing Code
 

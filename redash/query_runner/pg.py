@@ -169,7 +169,7 @@ class PostgreSQL(BaseSQLQueryRunner):
             },
             "order": ["host", "port", "user", "password"],
             "required": ["dbname"],
-            "secret": ["password"],
+            "secret": ["password", "sslrootcertFile", "sslcertFile", "sslkeyFile"],
             "extra_options": [
                 "sslmode",
                 "sslrootcertFile",
@@ -186,7 +186,7 @@ class PostgreSQL(BaseSQLQueryRunner):
         results, error = self.run_query(query, None)
 
         if error is not None:
-            raise Exception("Failed getting schema.")
+            self._handle_run_query_error(error)
 
         results = json_loads(results)
 

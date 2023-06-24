@@ -45,10 +45,27 @@ class Snowflake(BaseQueryRunner):
                 "warehouse": {"type": "string"},
                 "database": {"type": "string"},
                 "region": {"type": "string", "default": "us-west"},
+                "lower_case_columns": {
+                    "type": "boolean",
+                    "title": "Lower Case Column Names in Results",
+                    "default": False,
+                },
+                "host": {"type": "string"},
             },
-            "order": ["account", "user", "password", "warehouse", "database", "region"],
+            "order": [
+                "account",
+                "user",
+                "password",
+                "warehouse",
+                "database",
+                "region",
+                "host",
+            ],
             "required": ["user", "password", "account", "database", "warehouse"],
             "secret": ["password"],
+            "extra_options": [
+                "host",
+            ],
         }
 
     @classmethod
@@ -64,23 +81,42 @@ class Snowflake(BaseQueryRunner):
 
     def _get_connection(self):
         region = self.configuration.get("region")
+        account = self.configuration["account"]
 
         # for us-west we don't need to pass a region (and if we do, it fails to connect)
         if region == "us-west":
             region = None
 
+        if self.configuration.__contains__("host"):
+            host = self.configuration.get("host")
+        else:
+            if region:
+                host = "{}.{}.snowflakecomputing.com".format(account, region)
+            else:
+                host = "{}.snowflakecomputing.com".format(account)
+
         connection = snowflake.connector.connect(
             user=self.configuration["user"],
             password=self.configuration["password"],
-            account=self.configuration["account"],
+            account=account,
             region=region,
+            host=host,
         )
 
         return connection
 
+    def _column_name(self, column_name):
+        if self.configuration.get("lower_case_columns", False):
+            return column_name.lower()
+
+        return column_name
+
     def _parse_results(self, cursor):
         columns = self.fetch_columns(
-            [(i[0], self.determine_type(i[1], i[5])) for i in cursor.description]
+            [
+                (self._column_name(i[0]), self.determine_type(i[1], i[5]))
+                for i in cursor.description
+            ]
         )
         rows = [
             dict(zip((column["name"] for column in columns), row)) for row in cursor
@@ -123,10 +159,10 @@ class Snowflake(BaseQueryRunner):
             cursor.close()
             connection.close()
 
-        return data, error    
-    
+        return data, error
+
     def _database_name_includes_schema(self):
-        return '.' in self.configuration.get('database')
+        return "." in self.configuration.get("database")
 
     def get_schema(self, get_stats=False):
         if self._database_name_includes_schema():
@@ -137,7 +173,7 @@ class Snowflake(BaseQueryRunner):
         results, error = self._run_query_without_warehouse(query)
 
         if error is not None:
-            raise Exception("Failed getting schema.")
+            self._handle_run_query_error(error)
 
         schema = {}
         for row in results["rows"]:

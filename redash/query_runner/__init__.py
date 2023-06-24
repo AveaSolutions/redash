@@ -9,11 +9,14 @@ from urllib.parse import urlparse
 
 from six import text_type
 from sshtunnel import open_tunnel
-from redash import settings
+from redash import settings, utils
 from redash.utils import json_loads
 from rq.timeouts import JobTimeoutException
 
-from redash.utils.requests_session import requests, requests_session
+from redash.utils.requests_session import requests_or_advocate, requests_session, UnacceptableAddressException
+
+
+import sqlparse
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +51,61 @@ SUPPORTED_COLUMN_TYPES = set(
     [TYPE_INTEGER, TYPE_FLOAT, TYPE_BOOLEAN, TYPE_STRING, TYPE_DATETIME, TYPE_DATE]
 )
 
+def split_sql_statements(query):
+    def strip_trailing_comments(stmt):
+        idx = len(stmt.tokens) - 1
+        while idx >= 0:
+            tok = stmt.tokens[idx]
+            if tok.is_whitespace or sqlparse.utils.imt(tok, i=sqlparse.sql.Comment, t=sqlparse.tokens.Comment):
+                stmt.tokens[idx] = sqlparse.sql.Token(sqlparse.tokens.Whitespace, ' ')
+            else:
+                break
+            idx -= 1
+        return stmt
+
+    def strip_trailing_semicolon(stmt):
+        idx = len(stmt.tokens) - 1
+        while idx >= 0:
+            tok = stmt.tokens[idx]
+            # we expect that trailing comments already are removed
+            if not tok.is_whitespace:
+                if sqlparse.utils.imt(tok, t=sqlparse.tokens.Punctuation) and tok.value == ";":
+                    stmt.tokens[idx] = sqlparse.sql.Token(sqlparse.tokens.Whitespace, ' ')
+                break
+            idx -= 1
+        return stmt
+
+    def is_empty_statement(stmt):
+        strip_comments = sqlparse.filters.StripCommentsFilter()
+
+        # copy statement object. `copy.deepcopy` fails to do this, so just re-parse it
+        st = sqlparse.engine.FilterStack()
+        stmt = next(st.run(sqlparse.text_type(stmt)))
+
+        sql = sqlparse.text_type(strip_comments.process(stmt))
+        return sql.strip() == ""
+
+    stack = sqlparse.engine.FilterStack()
+
+    result = [stmt for stmt in stack.run(query)]
+    result = [strip_trailing_comments(stmt) for stmt in result]
+    result = [strip_trailing_semicolon(stmt) for stmt in result]
+    result = [sqlparse.text_type(stmt).strip() for stmt in result if not is_empty_statement(stmt)]
+
+    if len(result) > 0:
+        return result
+
+    return [""]  # if all statements were empty - return a single empty statement
+
+
+def combine_sql_statements(queries):
+    return ";\n".join(queries)
+
+def find_last_keyword_idx(parsed_query):
+    for i in reversed(range(len(parsed_query.tokens))):
+        if parsed_query.tokens[i].ttype in sqlparse.tokens.Keyword:
+            return i
+    return -1
 
 class InterruptException(Exception):
     pass
@@ -61,6 +119,8 @@ class BaseQueryRunner(object):
     deprecated = False
     should_annotate_query = True
     noop_query = None
+    limit_query = " LIMIT 1000"
+    limit_keywords = [ "LIMIT", "OFFSET"]
 
     def __init__(self, configuration):
         self.syntax = "sql"
@@ -83,7 +143,7 @@ class BaseQueryRunner(object):
         """Returns this query runner's configured host.
         This is used primarily for temporarily swapping endpoints when using SSH tunnels to connect to a data source.
 
-        `BaseQueryRunner`'s naïve implementation supports query runner implementations that store endpoints using `host` and `port` 
+        `BaseQueryRunner`'s naïve implementation supports query runner implementations that store endpoints using `host` and `port`
         configuration values. If your query runner uses a different schema (e.g. a web address), you should override this function.
         """
         if "host" in self.configuration:
@@ -96,7 +156,7 @@ class BaseQueryRunner(object):
         """Sets this query runner's configured host.
         This is used primarily for temporarily swapping endpoints when using SSH tunnels to connect to a data source.
 
-        `BaseQueryRunner`'s naïve implementation supports query runner implementations that store endpoints using `host` and `port` 
+        `BaseQueryRunner`'s naïve implementation supports query runner implementations that store endpoints using `host` and `port`
         configuration values. If your query runner uses a different schema (e.g. a web address), you should override this function.
         """
         if "host" in self.configuration:
@@ -109,7 +169,7 @@ class BaseQueryRunner(object):
         """Returns this query runner's configured port.
         This is used primarily for temporarily swapping endpoints when using SSH tunnels to connect to a data source.
 
-        `BaseQueryRunner`'s naïve implementation supports query runner implementations that store endpoints using `host` and `port` 
+        `BaseQueryRunner`'s naïve implementation supports query runner implementations that store endpoints using `host` and `port`
         configuration values. If your query runner uses a different schema (e.g. a web address), you should override this function.
         """
         if "port" in self.configuration:
@@ -122,7 +182,7 @@ class BaseQueryRunner(object):
         """Sets this query runner's configured port.
         This is used primarily for temporarily swapping endpoints when using SSH tunnels to connect to a data source.
 
-        `BaseQueryRunner`'s naïve implementation supports query runner implementations that store endpoints using `host` and `port` 
+        `BaseQueryRunner`'s naïve implementation supports query runner implementations that store endpoints using `host` and `port`
         configuration values. If your query runner uses a different schema (e.g. a web address), you should override this function.
         """
         if "port" in self.configuration:
@@ -174,6 +234,13 @@ class BaseQueryRunner(object):
     def get_schema(self, get_stats=False):
         raise NotSupported()
 
+    def _handle_run_query_error(self, error):
+        if error is None:
+            return
+
+        logger.error(error)
+        raise Exception(f"Error during query execution. Reason: {error}")
+
     def _run_query_internal(self, query):
         results, error = self.run_query(query, None)
 
@@ -189,6 +256,17 @@ class BaseQueryRunner(object):
             "configuration_schema": cls.configuration_schema(),
             **({"deprecated": True} if cls.deprecated else {}),
         }
+
+    @property
+    def supports_auto_limit(self):
+        return False
+
+    def apply_auto_limit(self, query_text, should_apply_auto_limit):
+        return query_text
+
+    def gen_query_hash(self, query_text, set_auto_limit=False):
+        query_text = self.apply_auto_limit(query_text, set_auto_limit)
+        return utils.gen_query_hash(query_text)
 
 
 class BaseSQLQueryRunner(BaseQueryRunner):
@@ -208,11 +286,42 @@ class BaseSQLQueryRunner(BaseQueryRunner):
                 res = self._run_query_internal("select count(*) as cnt from %s" % t)
                 tables_dict[t]["size"] = res[0]["cnt"]
 
+    @property
+    def supports_auto_limit(self):
+        return True
 
-def is_private_address(url):
-    hostname = urlparse(url).hostname
-    ip_address = socket.gethostbyname(hostname)
-    return ipaddress.ip_address(text_type(ip_address)).is_private
+    def query_is_select_no_limit(self, query):
+        parsed_query = sqlparse.parse(query)[0]
+        last_keyword_idx = find_last_keyword_idx(parsed_query)
+        # Either invalid query or query that is not select
+        if last_keyword_idx == -1 or parsed_query.tokens[0].value.upper() != "SELECT":
+            return False
+
+        no_limit = parsed_query.tokens[last_keyword_idx].value.upper() not in self.limit_keywords
+
+        return no_limit
+
+    def add_limit_to_query(self, query):
+        parsed_query = sqlparse.parse(query)[0]
+        limit_tokens = sqlparse.parse(self.limit_query)[0].tokens
+        length = len(parsed_query.tokens)
+        if parsed_query.tokens[length - 1].ttype == sqlparse.tokens.Punctuation:
+            parsed_query.tokens[length - 1:length - 1] = limit_tokens
+        else:
+            parsed_query.tokens += limit_tokens
+        return str(parsed_query)
+
+
+    def apply_auto_limit(self, query_text, should_apply_auto_limit):
+        if should_apply_auto_limit:
+            queries = split_sql_statements(query_text)
+            # we only check for last one in the list because it is the one that we show result
+            last_query = queries[-1]
+            if self.query_is_select_no_limit(last_query):
+                queries[-1] = self.add_limit_to_query(last_query)
+            return combine_sql_statements(queries)
+        else:
+            return query_text
 
 
 class BaseHTTPQueryRunner(BaseQueryRunner):
@@ -258,8 +367,6 @@ class BaseHTTPQueryRunner(BaseQueryRunner):
             return None
 
     def get_response(self, url, auth=None, http_method="get", **kwargs):
-        if is_private_address(url) and settings.ENFORCE_PRIVATE_ADDRESS_BLOCK:
-            raise Exception("Can't query private addresses.")
 
         # Get authentication values if not given
         if auth is None:
@@ -280,12 +387,15 @@ class BaseHTTPQueryRunner(BaseQueryRunner):
             if response.status_code != 200:
                 error = "{} ({}).".format(self.response_error, response.status_code)
 
-        except requests.HTTPError as exc:
+        except requests_or_advocate.HTTPError as exc:
             logger.exception(exc)
             error = "Failed to execute query. " "Return Code: {} Reason: {}".format(
                 response.status_code, response.text
             )
-        except requests.RequestException as exc:
+        except UnacceptableAddressException as exc:
+            logger.exception(exc)
+            error = "Can't query private addresses."
+        except requests_or_advocate.RequestException as exc:
             # Catch all other requests exceptions and return the error.
             logger.exception(exc)
             error = str(exc)

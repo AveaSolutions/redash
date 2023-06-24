@@ -9,7 +9,6 @@ from rq.decorators import job as rq_job
 
 from redash import (
     create_app,
-    extensions,
     settings,
     redis_connection,
     rq_redis_connection,
@@ -30,7 +29,7 @@ class StatsdRecordingJobDecorator(rq_job):  # noqa
     queue_class = RedashQueue
 
 
-job = partial(StatsdRecordingJobDecorator, connection=rq_redis_connection)
+job = partial(StatsdRecordingJobDecorator, connection=rq_redis_connection, failure_ttl=settings.JOB_DEFAULT_FAILURE_TTL)
 
 
 class CurrentJobFilter(logging.Filter):

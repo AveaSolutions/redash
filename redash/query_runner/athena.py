@@ -180,6 +180,9 @@ class Athena(BaseQueryRunner):
                 iterator = table_paginator.paginate(DatabaseName=database["Name"])
                 for table in iterator.search("TableList[]"):
                     table_name = "%s.%s" % (database["Name"], table["Name"])
+                    if 'StorageDescriptor' not in table:
+                        logger.warning("Glue table doesn't have StorageDescriptor: %s", table_name)
+                        continue
                     if table_name not in schema:
                         column = [
                             columns["Name"]
@@ -203,7 +206,7 @@ class Athena(BaseQueryRunner):
 
         results, error = self.run_query(query, None)
         if error is not None:
-            raise Exception("Failed getting schema.")
+            self._handle_run_query_error(error)
 
         results = json_loads(results)
         for row in results["rows"]:
