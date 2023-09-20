@@ -1,6 +1,6 @@
 .dashboard-wrapper {
   flex-grow: 1;
-  margin-bottom: 70px;
+  margin-bottom: 5px;
 
   .layout {
     margin: -15px -15px 0;
@@ -11,15 +11,20 @@
     position: absolute;
     left: 0;
     top: 0;
-    right: 0;
+    // right: 0;
     bottom: 0;
     width: auto;
-    height: auto;
-    overflow: hidden;
+    height: inherit;
+    // overflow: hidden;
     margin: 0;
     padding: 0;
   }
 
+  // CE: Won't help until you emit classnames by visualization type 
+  // .tile:not(.TABLE) {
+  //   right: 0px;
+  // }
+  
   .pivot-table-visualization-container > table,
   .visualization-renderer > .visualization-renderer-wrapper {
     overflow: visible;
@@ -47,7 +52,7 @@
       position: absolute;
       top: 0;
       left: 0;
-      bottom: 85px;
+      bottom: 5px;
       right: 0;
       background: linear-gradient(to bottom, transparent, transparent 2px, #f6f8f9 2px, #f6f8f9 5px),
         linear-gradient(to left, #b3babf, #b3babf 1px, transparent 1px, transparent);
@@ -75,16 +80,34 @@
   }
 }
 
+dashboard-widget {
+  height: inherit;
+}
+
+.widget-wrapper {
+  height: inherit;
+}
+
+.ant-table {
+  overflow-x: overlay;
+}
+
+.ant-table-body {
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
 .dashboard-wrapper .dashboard-widget-wrapper:not(.widget-auto-height-enabled),
 .query-fixed-layout {
   .visualization-renderer {
     display: flex;
     flex-direction: column;
-    position: absolute;
+    // position: absolute;
     left: 0;
     top: 0;
     right: 0;
     bottom: 0;
+    height: 100%;
 
     > .visualization-renderer-wrapper {
       flex-grow: 1;

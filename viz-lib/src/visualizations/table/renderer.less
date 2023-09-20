@@ -1,5 +1,14 @@
 @import "../variables";
 
+// .inhert-height {
+//   height: inherit;
+// }
+
+// .ant-table-header {
+//   height: auto !important;
+//   overflow: visible !important;
+// }
+
 .table-visualization-container {
   .ant-pagination.ant-table-pagination {
     float: none;
@@ -11,6 +20,16 @@
   .ant-table {
     overflow-x: auto;
   }
+  
+  // CE: Applied originally but now has no effect
+  // .ant-table-content {
+  //   display: flex;
+  //   flex-direction: column;
+
+  //   table {
+  //     table-layout: fixed;
+  //   }
+  // }
 
   .table-fixed-header {
     table {
@@ -124,7 +143,8 @@
   /* START table x scroll */
   .dashboard-widget-wrapper:not(.widget-auto-height-enabled) &,
   .query-fixed-layout & {
-    position: absolute;
+    // CE: Keeps the table width flexible, otherwise stuck as a single column
+    // position: absolute;
     left: 0;
     top: 0;
     width: 100%;
