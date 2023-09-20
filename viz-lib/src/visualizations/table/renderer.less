@@ -143,7 +143,9 @@
   /* START table x scroll */
   .dashboard-widget-wrapper:not(.widget-auto-height-enabled) &,
   .query-fixed-layout & {
-    // CE: Keeps the table width flexible, otherwise stuck as a single column
+    // CE: Relative keeps the table width flexible, otherwise stuck as a single column
+    // but it has the side effect of breaking the v10 fixed headers so I set special classes 
+    // for .ant-table-content and .ant-table-tbody 
     // position: absolute;
     left: 0;
     top: 0;
