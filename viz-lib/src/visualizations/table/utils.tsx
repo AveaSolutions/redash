@@ -70,6 +70,7 @@ export function prepareColumns(columns: any, searchInput: any, orderBy: any, onO
       key: column.name,
       dataIndex: `record[${JSON.stringify(column.name)}]`,
       align: column.alignContent,
+      width: column.width || '150px',
       sorter: { multiple: 1 }, // using { multiple: 1 } to allow built-in multi-column sort arrows
       sortOrder: get(orderByInfo, [column.name, "direction"], null),
       title: (
