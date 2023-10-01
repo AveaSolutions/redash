@@ -80,7 +80,7 @@ class SqlServer(BaseSQLQueryRunner):
         results, error = self.run_query(query, None)
 
         if error is not None:
-            raise Exception("Failed getting schema. " + error)
+            raise Exception("Failed getting schema. [%s]." % error)
 
         results = json_loads(results)
 
