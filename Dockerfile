@@ -34,9 +34,16 @@ ARG skip_dev_deps
 
 RUN useradd --create-home redash
 
-# Ubuntu packages
-RUN apt-get update && \
-  apt-get install -y \
+# Debian Buster is EOL: default mirrors are unreliable. Use archive.debian.org + disable valid-until
+# checks on archived Release files. MS ODBC: use signed-by keyring (apt-key is deprecated).
+RUN set -eux; \
+  printf '%s\n' \
+    'deb http://archive.debian.org/debian buster main' \
+    'deb http://archive.debian.org/debian-security buster/updates main' \
+    > /etc/apt/sources.list; \
+  echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until; \
+  apt-get update && \
+  apt-get install -y --no-install-recommends \
     curl \
     gnupg \
     build-essential \
@@ -45,22 +52,20 @@ RUN apt-get update && \
     sudo \
     git-core \
     wget \
-    # Postgres client
     libpq-dev \
-    # ODBC support:
-    g++ unixodbc-dev \
-    # for SAML
+    g++ \
+    unixodbc-dev \
     xmlsec1 \
-    # Additional packages required for data sources:
     libssl-dev \
     default-libmysqlclient-dev \
     freetds-dev \
     libsasl2-dev \
     unzip \
-    libsasl2-modules-gssapi-mit && \
-  # MSSQL ODBC Driver:  
-  curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
-  curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    libsasl2-modules-gssapi-mit \
+    ca-certificates && \
+  install -d /usr/share/keyrings && \
+  curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg && \
+  echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/debian/10/prod buster main' > /etc/apt/sources.list.d/mssql-release.list && \
   apt-get update && \
   ACCEPT_EULA=Y apt-get install -y msodbcsql17 && \
   apt-get clean && \
