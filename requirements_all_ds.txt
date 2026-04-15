@@ -40,4 +40,5 @@ trino~=0.305
 cmem-cmempy==21.2.3
 xlrd==2.0.1
 openpyxl==3.0.7
-firebolt-sqlalchemy
+# Pin: 1.0.3+ requires firebolt-sdk>=1.5.0 (Python >=3.8). Image uses Python 3.7.
+firebolt-sqlalchemy==1.0.2
