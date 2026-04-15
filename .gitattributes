@@ -1,0 +1,4 @@
+* text=auto
+
+# Shell/Python tooling used by Docker images and CI — must stay LF on Windows checkouts
+bin/** text eol=lf
