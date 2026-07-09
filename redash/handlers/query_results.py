@@ -2,10 +2,11 @@ import logging
 import time
 
 import unicodedata
+from urllib.parse import quote
+
 from flask import make_response, request
 from flask_login import current_user
 from flask_restful import abort
-from werkzeug.urls import url_quote
 from redash import models, settings
 from redash.handlers.base import BaseResource, get_object_or_404, record_event
 from redash.permissions import (
@@ -148,7 +149,7 @@ def content_disposition_filenames(attachment_filename):
             "filename": unicodedata.normalize("NFKD", attachment_filename).encode(
                 "ascii", "ignore"
             ),
-            "filename*": "UTF-8''%s" % url_quote(attachment_filename, safe=b""),
+            "filename*": "UTF-8''%s" % quote(attachment_filename, safe=b""),
         }
     else:
         filenames = {"filename": attachment_filename}

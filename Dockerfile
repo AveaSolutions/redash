@@ -1,4 +1,4 @@
-FROM node:12 as frontend-builder
+FROM node:16-bullseye as frontend-builder
 
 # Controls whether to build the frontend assets
 ARG skip_frontend_build
@@ -23,7 +23,7 @@ COPY --chown=redash client /frontend/client
 COPY --chown=redash webpack.config.js /frontend/
 RUN if [ "x$skip_frontend_build" = "x" ] ; then npm run build; else mkdir -p /frontend/client/dist && touch /frontend/client/dist/multi_org.html && touch /frontend/client/dist/index.html; fi
 
-FROM python:3.7-slim-buster
+FROM python:3.10-slim-bullseye
 
 EXPOSE 5000
 
@@ -34,14 +34,11 @@ ARG skip_dev_deps
 
 RUN useradd --create-home redash
 
-# Debian Buster is EOL: default mirrors are unreliable. Use archive.debian.org + disable valid-until
-# checks on archived Release files. MS ODBC: use signed-by keyring (apt-key is deprecated).
+# MS ODBC: use signed-by keyring (apt-key is deprecated). The Microsoft repo only publishes
+# amd64 packages, so msodbcsql17 is installed on amd64 only (production images are amd64;
+# arm64 is for local development, where the MSSQL ODBC runner degrades to disabled).
+# msodbcsql17 (not 18): the mssql_odbc query runner hardcodes "ODBC Driver 17 for SQL Server".
 RUN set -eux; \
-  printf '%s\n' \
-    'deb http://archive.debian.org/debian buster main' \
-    'deb http://archive.debian.org/debian-security buster/updates main' \
-    > /etc/apt/sources.list; \
-  echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until; \
   apt-get update && \
   apt-get install -y --no-install-recommends \
     curl \
@@ -63,35 +60,43 @@ RUN set -eux; \
     unzip \
     libsasl2-modules-gssapi-mit \
     ca-certificates && \
-  install -d /usr/share/keyrings && \
-  curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg && \
-  echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/debian/10/prod buster main' > /etc/apt/sources.list.d/mssql-release.list && \
-  apt-get update && \
-  ACCEPT_EULA=Y apt-get install -y msodbcsql17 && \
+  if [ "$(dpkg --print-architecture)" = "amd64" ]; then \
+    install -d /usr/share/keyrings && \
+    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg && \
+    echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/debian/11/prod bullseye main' > /etc/apt/sources.list.d/mssql-release.list && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y msodbcsql17; \
+  fi && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
+# Simba/Databricks Spark ODBC driver (amd64-only .deb; same arch gating as msodbcsql17).
 ARG databricks_odbc_driver_url=https://databricks.com/wp-content/uploads/2.6.10.1010-2/SimbaSparkODBC-2.6.10.1010-2-Debian-64bit.zip
-RUN wget --quiet $databricks_odbc_driver_url -O /tmp/simba_odbc.zip \
-  && chmod 600 /tmp/simba_odbc.zip \
-  && unzip /tmp/simba_odbc.zip -d /tmp/ \
-  && dpkg -i /tmp/SimbaSparkODBC-*/*.deb \
-  && echo "[Simba]\nDriver = /opt/simba/spark/lib/64/libsparkodbc_sb64.so" >> /etc/odbcinst.ini \
-  && rm /tmp/simba_odbc.zip \
-  && rm -rf /tmp/SimbaSparkODBC*
+RUN set -eux; \
+  if [ "$(dpkg --print-architecture)" = "amd64" ]; then \
+    wget --quiet $databricks_odbc_driver_url -O /tmp/simba_odbc.zip \
+    && chmod 600 /tmp/simba_odbc.zip \
+    && unzip /tmp/simba_odbc.zip -d /tmp/ \
+    && dpkg -i /tmp/SimbaSparkODBC-*/*.deb \
+    && printf '[Simba]\nDriver = /opt/simba/spark/lib/64/libsparkodbc_sb64.so\n' >> /etc/odbcinst.ini \
+    && rm /tmp/simba_odbc.zip \
+    && rm -rf /tmp/SimbaSparkODBC*; \
+  fi
 
 WORKDIR /app
 
-# Disalbe PIP Cache and Version Check
+# Disable PIP Cache and Version Check
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 ENV PIP_NO_CACHE_DIR=1
-
-# rollback pip version to avoid legacy resolver problem
-RUN pip install pip==20.2.4;
 
 # We first copy only the requirements file, to avoid rebuilding on every file change.
 COPY requirements_all_ds.txt ./
 RUN if [ "x$skip_ds_deps" = "x" ] ; then pip install -r requirements_all_ds.txt ; else echo "Skipping pip install -r requirements_all_ds.txt" ; fi
+
+# dql (DynamoDB SQL) declares python-dateutil<2.7.0, which conflicts with botocore's
+# requirement and makes the resolver fail, but it works fine at runtime with 2.8.
+# Install it (and its friends) without dependency resolution. See requirements_all_ds.txt.
+RUN if [ "x$skip_ds_deps" = "x" ] ; then pip install --no-deps dql==0.5.26 dynamo3==0.4.10 future ; fi
 
 COPY requirements_bundles.txt requirements_dev.txt ./
 RUN if [ "x$skip_dev_deps" = "x" ] ; then pip install -r requirements_dev.txt ; fi

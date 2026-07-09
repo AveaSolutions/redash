@@ -45,7 +45,8 @@
         "range": null,
         "overlaying": "y",
         "side": "right"
-      }
+      },
+      "hovermode": "x"
     }
   }
 }

@@ -31,7 +31,8 @@
         "type": "linear",
         "autorange": true,
         "range": null
-      }
+      },
+      "hovermode": "x"
     }
   }
 }
