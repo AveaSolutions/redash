@@ -45,11 +45,11 @@ v10.1.0 was itself a security release; the fork **already contains** the fixes f
 - **CVE-2020-12725** (GHSA-4599-9qr8-ccj6) — redirect-based SSRF bypass: covered by advocate + `REQUESTS_ALLOW_REDIRECTS=false` default. ✅ mitigated
 - **GHSA-32fw-wc7f-7qg9** (2024) — LDAP filter injection: fork mitigated harder than upstream by disabling LDAP search entirely (LDAP unused; `ldap3` not installed). ✅ mitigated
 
-**LIVE app-level CVE (must fix):**
+**App-level CVE (fixed in remediation):**
 
-- **CVE-2021-21239 / GHSA-rm5x-rgmf-qv5c — SAML signature bypass → auth takeover (Critical, CVSS 9.1).** `pysaml2==6.1.0` (`requirements.txt:40`) is below the fixed 6.5.0. pysaml2 < 6.5.0 prefers a key embedded in the SAML message over the configured IdP cert, so a forged assertion is accepted. The fork's config amplifies it: `want_response_signed: False` + `allow_unsolicited: True` + JIT provisioning with attacker-controllable `RedashGroups` (`redash/authentication/saml_auth.py:53-62,123-132`) means anyone who can reach `/saml/callback` can impersonate any user, including admins — **only if SAML login is enabled**. Fix = the backend workstream's `pysaml2==7.3.1` bump. If SAML is unused in AveaOffice, also disable the blueprint to remove the attack surface.
+- **CVE-2021-21239 / GHSA-rm5x-rgmf-qv5c — SAML signature bypass → auth takeover (Critical, CVSS 9.1).** Was `pysaml2==6.1.0`; fixed at **`pysaml2==7.3.1`** (`requirements.txt:44`). ✅ fixed. If SAML is unused in AveaOffice, disabling the blueprint remains optional hardening.
 
-**Reachable code-level SSRF gap (secondary):** the CSV and Excel runners call `requests_or_advocate.get(...)` directly (`redash/query_runner/csv.py:59`, `redash/query_runner/excel.py:56`) instead of going through `ConfiguredSession`/`requests_session`. advocate still blocks private IPs, but these two bypass the `REQUESTS_ALLOW_REDIRECTS=false` control and degrade to raw `requests.get` if an operator disables `ENFORCE_PRIVATE_ADDRESS_BLOCK`. → route both through `requests_session` (parent agent to apply after backend workstream lands, to avoid working-tree races).
+**Reachable code-level SSRF gap (secondary):** ~~CSV and Excel runners~~ — **N/A.** This fork ships only PostgreSQL + MSSQL runners; `csv.py` / `excel.py` were removed. Remaining HTTP surface uses `ConfiguredSession` via `BaseHTTPQueryRunner`.
 
 **Production config hardening (deployment, not code):** set `REDASH_ENFORCE_CSRF=true`, `REDASH_ENFORCE_HTTPS=true` (secure cookies), and distinct `REDASH_COOKIE_SECRET` vs `REDASH_SECRET_KEY`. These are safe-off upstream defaults; document in the AveaOffice deploy config rather than changing fork defaults.
 
@@ -115,10 +115,9 @@ commits that accompanied each bump. Then go further where safe (gunicorn 22, Jin
    - Keep `SQLAlchemy-Searchable==0.10.6` (newer requires PG > 9.6; Avea PG version unverified).
    - Remove `pycrypto` (unused, unfixable).
    - Keep `advocate` (SSRF protection).
-3. **requirements_all_ds.txt** → upstream pre-poetry set; keep fork-only runner deps
-   (`dql`/`dynamo3`, `pymapd`, `ibm-db`, `firebolt-sqlalchemy`) only where they still install on
-   py3.10 — runners degrade gracefully (hidden) when their driver is absent. MSSQL (`pymssql 2.2.8`,
-   the runner Avea customized) is unchanged behaviorally.
+3. **requirements_all_ds.txt** → scoped to Avea's data sources: `pymssql` + `pyodbc` only (PostgreSQL
+   driver is in `requirements.txt`). MSSQL (`pymssql` 2.2.x, the runner Avea customized) unchanged
+   behaviorally.
 4. **requirements_dev.txt** → pytest 7.x etc. (py3.10-compatible test toolchain).
 5. **Frontend runtime deps** (root + viz-lib): dompurify 2.5.8, moment 2.30.x, lodash 4.17.21,
    axios 0.28.x, path-to-regexp 3.3.0, plotly.js 2.35.3 with the upstream chart-layout migration
@@ -132,13 +131,12 @@ commits that accompanied each bump. Then go further where safe (gunicorn 22, Jin
 
 ### Tracked follow-ups (post-remediation tickets)
 
-- **dompurify 3.x migration.** This pass took dompurify to 2.5.9 (latest 2.x, API-compatible). The
-  2025–2026 mXSS / IN_PLACE / hook-pollution advisories are only fixed in dompurify 3.2.4+, a
-  breaking major. Evaluate upgrading `viz-lib/src/services/sanitize.ts` and
-  `client/app/services/sanitize.js` to dompurify 3.x as a dedicated follow-up.
-- **Flask 3 / Werkzeug 3 / Authlib 1.6 / PyJWT 2.13 / cryptography 42+ / urllib3 2.x.** The ~54
-  residual pip-audit findings need these major upgrades (upstream's own multi-year migration).
-  Track as a separate modernization epic.
+- **dompurify 3.x migration** — **open.** dompurify is at 2.5.8/2.5.9 (latest 2.x). The 2025–2026
+  mXSS / IN_PLACE / hook-pollution advisories are only fixed in dompurify 3.2.4+, a breaking major.
+  Evaluate upgrading `viz-lib/src/services/sanitize.ts` and `client/app/services/sanitize.js`.
+- **Flask 3 / Werkzeug 3 / urllib3 2.x** — **partially done.** Authlib 1.7.2, PyJWT 2.13.0, and
+  cryptography 48.0.1 were lifted during remediation ✅. Flask 3 / Werkzeug 3 were attempted and
+  rejected on evidence (see §4); urllib3 2.x remains blocked on `advocate` replacement.
 
 ### Accepted residual risk (documented)
 
@@ -156,9 +154,10 @@ commits that accompanied each bump. Then go further where safe (gunicorn 22, Jin
 
 - **requirements.txt pip-audit: 94 vulns / 21 packages → 54 / 13** after the backend upgrade set
   landed. Remaining findings are concentrated in packages whose fixes require a major-version
-  migration deferred by the plan (Flask 3, Werkzeug 3, Authlib 1.6, PyJWT 2.13, cryptography 42+,
-  urllib3 2.x). Safe drop-in bumps still available to fold in during consolidation: `requests`
-  2.31→2.32.4, `sqlparse` 0.4.4→0.5.4, `PyJWT` 2.4.0→2.10.x, `python-dotenv` →1.x.
+  migration deferred by the plan (Flask 3, Werkzeug 3, urllib3 2.x). ~~Safe drop-in bumps still
+  available to fold in during consolidation: `requests` 2.31→2.32.4, `sqlparse` 0.4.4→0.5.4,
+  `PyJWT` 2.4.0→2.10.x, `python-dotenv` →1.x.~~ **Folded in:** `sqlparse` 0.5.5, PyJWT 2.13.0,
+  `python-dotenv` 1.2.2. `requests` deliberately held at 2.31.0 (advocate SSRF hooks).
 - Base image moved to `python:3.10-slim-bullseye` / `node:16-bullseye` (both supported).
 
 ### Frontend — COMPLETE ✅
@@ -183,8 +182,8 @@ commits that accompanied each bump. Then go further where safe (gunicorn 22, Jin
 
 - Base image `python:3.7-slim-buster` → **`python:3.10-slim-bullseye`**; frontend builder → `node:16-bullseye`.
   archive.debian.org Buster hack removed; MS repo → `debian/11 prod` (keyring), **msodbcsql17 kept**
-  (mssql_odbc runner unchanged), msodbcsql17 + Simba ODBC gated on amd64 so arm64 dev builds work
-  and prod amd64 gets them unconditionally. pip 20.2.4 downgrade removed.
+  (mssql_odbc runner unchanged), msodbcsql17 gated on amd64 so arm64 dev builds work and prod amd64
+  gets it unconditionally. pip 20.2.4 downgrade removed.
 - Python deps lifted to upstream's proven pre-Poetry set + security bumps: Flask 2.3.2, Werkzeug 2.3.8,
   Jinja2 3.1.6, cryptography 45.0.7, pyOpenSSL 25.1.0, Authlib 1.7.2, PyJWT 2.13.0, RestrictedPython 8.1,
   gunicorn 22.0.0, **pysaml2 7.3.1** (closes the live CVE-2021-21239 SAML bypass), sqlparse 0.5.5,
@@ -193,23 +192,20 @@ commits that accompanied each bump. Then go further where safe (gunicorn 22, Jin
 - Backports: Flask 2.3 migration (`73f49cbf` incl. tests), Flask-Limiter (`a1a00c68`), sqlparse
   (`f3ba10ff`), pymongo 4, rq 1.9 worker, plus an upstream password-login bypass fix in
   `redash/handlers/authentication.py`.
-- Data sources: `pymapd` dropped (thrift pin conflict, runner disables gracefully); `firebolt` was
-  already broken in the fork baseline; all other 54 runners import (db2/mapd/firebolt disabled).
-  Avea's MSSQL runner (`pymssql` 2.2.11, same 2.2.x line) verified.
+- Data sources: fork scoped to **PostgreSQL + MSSQL only** (`pg`, `mssql`, `mssql_odbc`,
+  `query_results`; `requirements_all_ds.txt` is `pymssql` + `pyodbc`). Avea's MSSQL runner
+  (`pymssql` 2.2.11) verified.
 - **Tests: 732 passed, 0 failed.**
 
 ### Consolidation (parent agent) — COMPLETE ✅
 
-- **CSV/Excel SSRF-consistency fix applied.** `redash/query_runner/csv.py` and `excel.py` now call
-  `requests_session.get(...)` (the advocate-backed `ConfiguredSession`) instead of the bare
-  `requests_or_advocate.get(...)`, so both honor the `REQUESTS_ALLOW_REDIRECTS=false` control and
-  can't degrade to raw `requests` when `ENFORCE_PRIVATE_ADDRESS_BLOCK` is off.
+- ~~**CSV/Excel SSRF-consistency fix applied.**~~ **N/A after scope-down:** `csv.py` / `excel.py`
+  runners were removed; only pg/mssql runners remain. No reachable CSV/Excel SSRF surface.
 - Rebuilt image (`redash-sec:test`) — builds clean.
-- **Full backend suite re-run with the SSRF fix: 732 passed, 0 failed** (79s).
+- **Full backend suite re-run: 732 passed, 0 failed** (79s).
 - **Live boot smoke test:** `create_db` OK; gunicorn 22 boots; `/ping` → `PONG` (HTTP 200);
   `/login` → 302; `/setup` → 200; security headers present (`X-Frame-Options: deny`,
-  `X-Content-Type-Options: nosniff`, CSP with `frame-ancestors 'none'`); csv/excel runners import
-  cleanly at runtime and resolve to `ConfiguredSession`.
+  `X-Content-Type-Options: nosniff`, CSP with `frame-ancestors 'none'`).
 
 ### Major-version migration (commit 2) — COMPLETE ✅
 
@@ -246,7 +242,7 @@ CVEs (see below). This matches upstream's own posture.
 | Python data-source deps | (protobuf 3 + certifi) | **2 / 1 pkg** (certifi floor-pin artifact; image installs 2026.x) |
 | Frontend runtime (npm) | viz-lib 18 crit / root 35 crit | viz-lib 11 / root 28 — remainder is **dev-toolchain only** |
 | Redash app CVEs | 1 live (SAML CVE-2021-21239) | **0 live** (pysaml2 7.3.1) |
-| Reachable SSRF gap (csv/excel) | present | **closed** |
+| Reachable SSRF gap (csv/excel) | present | **N/A** (runners removed; pg/mssql only) |
 | Base platform | Python 3.7 / Debian Buster (EOL, non-building) | Python 3.10 / Debian Bullseye (supported, builds) |
 | Backend tests | (image didn't build) | **732 pass** + live `/ping` |
 
@@ -264,10 +260,22 @@ CVEs (see below). This matches upstream's own posture.
    (clears 8 of the 15 residual findings). Biggest remaining win.
 2. dompurify 2.x → 3.x (breaking) — the one runtime frontend dep still flagged.
 3. Flask 3 / Werkzeug 3 (+ SQLAlchemy 1.4/2.0, SQLAlchemy-Utils/Searchable rewrite) — track upstream;
-   revisit if/when upstream Redash does it. Clears the other 7 residual findings.
-4. One CI build on **amd64** to confirm the msodbcsql17/Simba ODBC path (local verification was arm64).
+   revisit if/when upstream Redash does it. Clears the other 7 residual findings. *(Attempted and
+   rejected during remediation — see §4.)*
+4. One CI build on **amd64** to confirm the msodbcsql17 path (local verification was arm64). CircleCI
+   `build-docker-image` uses amd64 remote docker but still targets the pre-remediation toolchain
+   (Python 3.7 / Node 12) and has not been verified post-upgrade.
 5. `docker-compose.yml` still pins `postgres:9.5` / `redis:3` and an obsolete `version:` key (dev only).
-6. Production config hardening: set `REDASH_ENFORCE_CSRF=true`, `REDASH_ENFORCE_HTTPS=true`, distinct
-   `REDASH_COOKIE_SECRET` vs `REDASH_SECRET_KEY`.
-7. dql/dynamo3 install via `--no-deps` in the Dockerfile — delete that line if the DynamoDB runner
-   is unused at Avea.
+6. Production config hardening: set `REDASH_ENFORCE_HTTPS=true` and distinct `REDASH_COOKIE_SECRET` vs
+   `REDASH_SECRET_KEY` in AveaOffice deploy config. *(Partial: dev `docker-compose.yml` already sets
+   `REDASH_ENFORCE_CSRF=true`.)*
+
+### Completed / N/A follow-ups
+
+- ~~**dql/dynamo3 install via `--no-deps` in the Dockerfile**~~ — **N/A.** Fork ships only PostgreSQL +
+  MSSQL runners; no DynamoDB runner code or deps.
+- **Post-remediation major bumps:** Authlib 1.7.2, PyJWT 2.13.0, cryptography 48.0.1, python-dotenv
+  1.2.2, sqlparse 0.5.5.
+- **Dockerfile npm 6.14.18 pin** — production frontend build fixed (`sql-formatter` git dep).
+- **SAML CVE-2021-21239** — closed at `pysaml2==7.3.1`.
+- **CSV/Excel SSRF fix** — N/A after runner scope-down.
