@@ -211,31 +211,63 @@ commits that accompanied each bump. Then go further where safe (gunicorn 22, Jin
   `X-Content-Type-Options: nosniff`, CSP with `frame-ancestors 'none'`); csv/excel runners import
   cleanly at runtime and resolve to `ConfiguredSession`.
 
+### Major-version migration (commit 2) — COMPLETE ✅
+
+Second commit pushed the deps further than the "defer all majors" plan, closing the
+snowflake-capped cluster. Verified: full image build, **732 tests pass**, live `/ping`, in-image
+imports confirm the new versions.
+
+- **cryptography 45.0.7 → 48.0.1**, **pyOpenSSL 25.1.0 → 26.2.0** (unblocked by the snowflake bump;
+  cffi moved to `>=2.0,<3.0`).
+- **snowflake-connector-python 3.18.0 → 4.5.0** (this was the cap holding pyOpenSSL < 26).
+- **google-api-python-client 1.7.11 → 2.190.0**, **protobuf 3.18.3 → 6.33.5** (forced compat bumps:
+  `phoenixdb 0.7 → 1.2.2`, `pydgraph → 25.1.0`, `libkrb5-dev` added to the image). No query-runner
+  code changes were required — BigQuery/Sheets/Analytics runners import and enable.
+- **Build fix (production-critical):** `node:16-bullseye` ships npm 8, which breaks `npm ci` on the
+  `sql-formatter` git dependency — the real production frontend build (`skip_frontend_build` unset)
+  was failing. Pinned **npm 6.14.18** in the Dockerfile builder stage; full image now builds
+  frontend + backend end to end.
+
+### Flask 3 / Werkzeug 3 — attempted, NOT adopted (accepted risk)
+
+Genuinely attempted and rejected on evidence (no code left behind; Flask stays 2.3.2 / Werkzeug 2.3.8):
+Flask 3 hard-requires Flask-SQLAlchemy ≥ 3.0 (FSA 2.5.1 fails to even import under Flask 3), which
+requires SQLAlchemy ≥ 1.4, which breaks the pinned `SQLAlchemy-Utils` (`sort_query`, used by every
+list endpoint's ordering) and `SQLAlchemy-Searchable` (`entity_zero`, the full-text search path). That
+is a pervasive model/search/ordering rewrite on SQLAlchemy 1.4 that **upstream Redash itself has not
+done** (master still ships Flask 2.3.2 / SA 1.3.24). Not worth the app-breakage risk for the residual
+CVEs (see below). This matches upstream's own posture.
+
 ## 5. Final security outcome
 
 | Surface | Before | After |
 |---|---|---|
-| Python (pip-audit, requirements.txt) | 94 vulns / 21 pkgs | **~23 / 6 pkgs** — all residuals hard-blocked (see below) |
-| Python data-source deps | — | 2 residual (protobuf, needs google-client 2.x) |
+| Python (pip-audit, requirements.txt) | 94 vulns / 21 pkgs | **15 / 4 pkgs** — all residuals hard-blocked (see below) |
+| Python data-source deps | (protobuf 3 + certifi) | **2 / 1 pkg** (certifi floor-pin artifact; image installs 2026.x) |
 | Frontend runtime (npm) | viz-lib 18 crit / root 35 crit | viz-lib 11 / root 28 — remainder is **dev-toolchain only** |
 | Redash app CVEs | 1 live (SAML CVE-2021-21239) | **0 live** (pysaml2 7.3.1) |
 | Reachable SSRF gap (csv/excel) | present | **closed** |
 | Base platform | Python 3.7 / Debian Buster (EOL, non-building) | Python 3.10 / Debian Bullseye (supported, builds) |
 | Backend tests | (image didn't build) | **732 pass** + live `/ping` |
 
-**Residual Python findings are all major-migration-blocked, none silent:** cryptography/pyOpenSSL
-(capped by snowflake 3.x's `pyOpenSSL<26`), Flask/Werkzeug (fixes only in 3.x), requests/urllib3
-(bumping breaks advocate's SSRF protection). These are captured as the modernization epic in §3.
+**The 15 residual requirements.txt findings are in exactly 4 packages, all deliberately blocked, none silent:**
+- **flask 2.3.2 (1)** + **werkzeug 2.3.8 (6)** — fixes only exist in the 3.x line; adopting them means
+  the SQLAlchemy 1.4 rewrite above. Held by design (matches upstream master).
+- **requests 2.31.0 (3)** + **urllib3 1.26.20 (5)** — requests 2.32 changed connection handling in a way
+  that **bypasses advocate's SSRF validation hooks**, and urllib3 fixes are 2.x-only (requires requests
+  2.32). Bumping would silently disable the SSRF protection that closes CVE-2021-43780. Held by design
+  until `advocate` is replaced with a maintained SSRF guard.
 
 ### Remaining follow-ups for the team (non-blocking)
 
-1. dompurify 2.x → 3.x (breaking) — the one runtime frontend dep still flagged.
-2. Modernization epic: Flask 3 / Werkzeug 3, snowflake 4 + cryptography 46 + pyOpenSSL 26,
-   google-api-client 2.x + protobuf 4, or swap `advocate` for a maintained SSRF guard to unlock
-   requests/urllib3.
-3. One CI build on **amd64** to confirm the msodbcsql17/Simba ODBC path (local verification was arm64).
-4. `docker-compose.yml` still pins `postgres:9.5` / `redis:3` and an obsolete `version:` key (dev only).
-5. Production config hardening: set `REDASH_ENFORCE_CSRF=true`, `REDASH_ENFORCE_HTTPS=true`, distinct
+1. **Replace `advocate` with a maintained SSRF guard**, then unblock requests 2.32.4 + urllib3 2.x
+   (clears 8 of the 15 residual findings). Biggest remaining win.
+2. dompurify 2.x → 3.x (breaking) — the one runtime frontend dep still flagged.
+3. Flask 3 / Werkzeug 3 (+ SQLAlchemy 1.4/2.0, SQLAlchemy-Utils/Searchable rewrite) — track upstream;
+   revisit if/when upstream Redash does it. Clears the other 7 residual findings.
+4. One CI build on **amd64** to confirm the msodbcsql17/Simba ODBC path (local verification was arm64).
+5. `docker-compose.yml` still pins `postgres:9.5` / `redis:3` and an obsolete `version:` key (dev only).
+6. Production config hardening: set `REDASH_ENFORCE_CSRF=true`, `REDASH_ENFORCE_HTTPS=true`, distinct
    `REDASH_COOKIE_SECRET` vs `REDASH_SECRET_KEY`.
-6. dql/dynamo3 install via `--no-deps` in the Dockerfile — delete that line if the DynamoDB runner
+7. dql/dynamo3 install via `--no-deps` in the Dockerfile — delete that line if the DynamoDB runner
    is unused at Avea.

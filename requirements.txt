@@ -5,10 +5,13 @@ aniso8601==8.0.0
 # ldap3==2.2.4
 Authlib==1.7.2
 blinker==1.6.2
-# Keep cffi on the 1.x line; this file is installed last so it decides the final version.
-cffi>=1.17.1,<2.0
+# cffi 2.x: cryptography 48.x requires cffi>=2.0. This file is installed last, so it
+# decides the final version.
+cffi>=2.0,<3.0
 click==8.1.3
-cryptography==45.0.7
+# 48.0.1 (not upstream v26's 48.0.0): 48.0.0 is still flagged by pip-audit
+# (GHSA-537c-gmf6-5ccf, fixed in 48.0.1); same 48.0.x line, same dependency contract.
+cryptography==48.0.1
 disposable-email-domains>=0.0.52
 Flask==2.3.2
 Flask-Limiter==3.3.1
@@ -33,7 +36,7 @@ parsedatetime==2.4
 passlib==1.7.3
 psycopg2-binary==2.9.6
 PyJWT==2.13.0
-pyOpenSSL==25.1.0
+pyOpenSSL==26.2.0
 # Pin pyparsing to the 2.x line: pyparsing 3.x breaks SQLAlchemy-Searchable 0.10.6.
 # 2.4.7 is the newest 2.x and also satisfies httplib2 (which needs >=2.4.2,<3).
 pyparsing==2.4.7
