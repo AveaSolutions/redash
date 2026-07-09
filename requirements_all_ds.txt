@@ -1,4 +1,5 @@
 # Data source drivers for this fork: PostgreSQL (via psycopg2 in requirements.txt)
 # and SQL Server only.
-pymssql==2.2.8
+# 2.2.11 is the first pymssql 2.2.x release with prebuilt aarch64 wheels.
+pymssql==2.2.11
 pyodbc==4.0.28

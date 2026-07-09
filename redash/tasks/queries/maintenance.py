@@ -113,6 +113,8 @@ def refresh_queries():
         "query_ids": json_dumps([q.id for q in enqueued]),
     }
 
+    # NOTE: intentionally hmset (deprecated in redis-py but functional): multi-field
+    # HSET requires Redis server >= 4.0, and we still support older Redis servers.
     redis_connection.hmset("redash:status", status)
     logger.info("Done refreshing queries: %s" % status)
 

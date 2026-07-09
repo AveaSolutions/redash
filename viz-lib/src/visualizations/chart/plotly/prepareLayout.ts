@@ -107,7 +107,7 @@ function prepareBoxLayout(layout: any, options: any, data: any) {
 }
 
 export default function prepareLayout(element: any, options: any, data: any) {
-  const layout = {
+  const layout: any = {
     margin: { l: 10, r: 10, b: 5, t: 20, pad: 4 },
     // plot size should be at least 5x5px
     width: Math.max(5, Math.floor(element.offsetWidth)),
@@ -118,6 +118,10 @@ export default function prepareLayout(element: any, options: any, data: any) {
       traceorder: options.legend.traceorder,
     },
   };
+
+  if (["line", "area", "column"].includes(options.globalSeriesType)) {
+    layout.hovermode = options.swappedAxes ? "y" : "x";
+  }
 
   switch (options.globalSeriesType) {
     case "pie":

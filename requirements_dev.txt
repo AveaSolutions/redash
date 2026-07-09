@@ -1,8 +1,8 @@
-pytest==5.2.1
-pytest-cov==2.8.1
-coverage==4.5.4
-mock==3.0.5
+coverage==7.2.7
+freezegun==1.2.1
+mock==5.0.2
+ptpython==3.0.23
 ptvsd==4.3.2
-freezegun==0.3.12
-watchdog==0.9.0
-ptpython==3.0.17
+pytest==7.4.0
+pytest-cov==4.1.0
+watchdog==3.0.0
