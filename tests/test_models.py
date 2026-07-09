@@ -494,7 +494,7 @@ class TestQueryAll(BaseTestCase):
 
     def test_update_query_hash_non_basesql(self):
         ds = self.factory.create_data_source(
-            group=self.factory.org.default_group, type="prometheus"
+            group=self.factory.org.default_group, type="results"
         )
         query = self.factory.create_query(query_text="SELECT 2", data_source=ds)
         query.options = {"apply_auto_limit": True}

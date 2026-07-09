@@ -122,8 +122,8 @@ class DataSourceCommandTests(BaseTestCase):
     def test_connection_test(self):
         self.factory.create_data_source(
             name="test1",
-            type="sqlite",
-            options=ConfigurationContainer({"dbpath": "/tmp/test.db"}),
+            type="results",
+            options=ConfigurationContainer({}),
         )
         runner = CliRunner()
         result = runner.invoke(manager, ["ds", "test", "test1"])
@@ -134,11 +134,15 @@ class DataSourceCommandTests(BaseTestCase):
     def test_connection_bad_test(self):
         self.factory.create_data_source(
             name="test1",
-            type="sqlite",
-            options=ConfigurationContainer({"dbpath": __file__}),
+            type="results",
+            options=ConfigurationContainer({}),
         )
         runner = CliRunner()
-        result = runner.invoke(manager, ["ds", "test", "test1"])
+        with mock.patch(
+            "redash.query_runner.query_results.Results.run_query",
+            return_value=(None, "not a database"),
+        ):
+            result = runner.invoke(manager, ["ds", "test", "test1"])
         self.assertTrue(result.exception)
         self.assertEqual(result.exit_code, 1)
         self.assertIn("Failure", result.output)
