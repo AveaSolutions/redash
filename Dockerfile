@@ -51,17 +51,12 @@ RUN set -eux; \
     libffi-dev \
     sudo \
     git-core \
-    wget \
     libpq-dev \
     g++ \
     unixodbc-dev \
     xmlsec1 \
     libssl-dev \
-    default-libmysqlclient-dev \
     freetds-dev \
-    libsasl2-dev \
-    unzip \
-    libsasl2-modules-gssapi-mit \
     ca-certificates && \
   install -d /usr/share/keyrings && \
   curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg && \
@@ -70,15 +65,6 @@ RUN set -eux; \
   ACCEPT_EULA=Y apt-get install -y msodbcsql17 && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
-
-ARG databricks_odbc_driver_url=https://databricks.com/wp-content/uploads/2.6.10.1010-2/SimbaSparkODBC-2.6.10.1010-2-Debian-64bit.zip
-RUN wget --quiet $databricks_odbc_driver_url -O /tmp/simba_odbc.zip \
-  && chmod 600 /tmp/simba_odbc.zip \
-  && unzip /tmp/simba_odbc.zip -d /tmp/ \
-  && dpkg -i /tmp/SimbaSparkODBC-*/*.deb \
-  && echo "[Simba]\nDriver = /opt/simba/spark/lib/64/libsparkodbc_sb64.so" >> /etc/odbcinst.ini \
-  && rm /tmp/simba_odbc.zip \
-  && rm -rf /tmp/SimbaSparkODBC*
 
 WORKDIR /app
 

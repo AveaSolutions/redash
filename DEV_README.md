@@ -2,11 +2,15 @@
 
 This guide covers running Redash locally on **Windows** using **Docker Desktop with the WSL2 backend**. It matches the repo's development `docker-compose.yml` setup: hot-reloading backend, background workers, Postgres, Redis, and a fake mail server.
 
+**Backend runs in Docker. Frontend builds on your WSL machine** (via `make` or `npm`). The `server` container is Python-only and does not include Node/npm.
+
 ## Prerequisites
 
 1. **Docker Desktop** installed with the **WSL2 backend** enabled.
 2. **WSL2** with a Linux distro (Ubuntu recommended).
 3. This repo cloned and accessible from WSL.
+4. **`make`** in WSL: `sudo apt install make`
+5. **Node.js 12** in WSL via [nvm](https://github.com/nvm-sh/nvm) (required for frontend builds).
 
 ### Where to keep the repo
 
@@ -16,13 +20,36 @@ If your repo lives on the Windows drive (e.g. `C:\Users\...\redash`), Docker wil
 
 ### Where to run commands
 
-Run all commands from a **WSL terminal** (Ubuntu, etc.) in the repo root:
+Run **all** commands from a **WSL terminal** (Ubuntu, etc.) in the repo root — not PowerShell or CMD:
 
 ```bash
 cd ~/repos/redash   # or your path, e.g. /mnt/c/Users/JeremyDeal/Desktop/repos/redash
 ```
 
-`make` targets work in WSL if `make` is installed (`sudo apt install make`). The commands below use `docker compose` directly so you do not need `make`.
+### Node.js setup (WSL only)
+
+Redash requires **Node 12** and **npm 6** (see `package.json`). Do **not** use Windows Node from `/mnt/c/Program Files/nodejs/` — it is the wrong version and breaks WSL builds (UNC path errors, platform mismatches).
+
+Install nvm and Node 12 once in WSL:
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+# restart your shell, then:
+nvm install 12
+nvm use 12
+nvm alias default 12
+```
+
+Before any frontend work, confirm you are on Linux Node:
+
+```bash
+source ~/.bashrc
+nvm use 12
+which npm node
+# Expected: ~/.nvm/versions/node/v12.22.12/bin/npm
+node --version   # v12.22.12
+npm --version    # 6.x
+```
 
 ---
 
@@ -37,7 +64,7 @@ cd ~/repos/redash   # or your path, e.g. /mnt/c/Users/JeremyDeal/Desktop/repos/r
 | `redis`    | Job queue / cache                            | internal only          |
 | `email`    | MailDev — captures outbound email           | http://localhost:1080  |
 
-The dev compose file bind-mounts your source into the container (`.:/app`), so code changes on disk are picked up without rebuilding the image.
+The dev compose file bind-mounts your source into the container (`.:/app`), so code changes on disk are picked up without rebuilding the image. Frontend assets are served from your local `client/dist/` directory (built on the host).
 
 ---
 
@@ -71,15 +98,17 @@ docker compose build
 
 The first build can take several minutes (Python dependencies, ODBC drivers, etc.).
 
-### 3. Build the frontend
+### 3. Install frontend dependencies and build
 
-Because the repo is bind-mounted over `/app`, the container serves frontend assets from your **local** `client/dist/` directory, not from whatever was baked into the image. Build the frontend inside the container (recommended on Windows — no local Node install required):
+Because the repo is bind-mounted over `/app`, the container serves frontend assets from your **local** `client/dist/` directory, not from whatever was baked into the image. Build the frontend on the host with Node 12:
 
 ```bash
-docker compose run --rm server sh -c "npm ci --unsafe-perm && npm run build"
+nvm use 12
+npm ci --unsafe-perm
+make build
 ```
 
-This only needs to be repeated when you change frontend code (or after a clean checkout).
+`make build` runs `bin/bundle-extensions` in Docker (usually a no-op), then `npm run build` locally. Repeat `make build` when you change frontend code; re-run `npm ci --unsafe-perm` only after `package.json` / `package-lock.json` changes.
 
 ### 4. Start the stack
 
@@ -105,7 +134,7 @@ Captured emails (invites, alerts, etc.) appear at **http://localhost:1080**.
 
 ## Recommended command cheat sheet
 
-All commands assume you are in the repo root inside WSL.
+All commands assume you are in the repo root inside WSL with `nvm use 12` active.
 
 ### Start / stop
 
@@ -134,13 +163,25 @@ docker compose run --rm server manage --help
 
 ```bash
 # One-off production build (served by Flask at :5000)
-docker compose run --rm server sh -c "npm ci --unsafe-perm && npm run build"
+make build
 
 # Rebuild after frontend changes (faster if node_modules already exist)
-docker compose run --rm server npm run build
+npm run build
 
 # Live rebuild on file changes (run in a separate terminal; leave it running)
-docker compose run --rm server npm run watch
+make watch
+
+# Dev server with hot reload (alternative to make watch)
+make start
+```
+
+Equivalent without `make`:
+
+```bash
+npm run bundle          # or: docker compose run --rm server bin/bundle-extensions
+npm ci --unsafe-perm     # once, or after lockfile changes
+npm run build
+npm run watch
 ```
 
 ### Backend shell / debugging
@@ -188,25 +229,25 @@ docker compose run --rm server tests
 
 2. **Backend (Python)** — edit files under `redash/`. The `dev_server`, `dev_worker`, and `dev_scheduler` commands use `watchmedo` to auto-restart on `.py` changes. No container rebuild needed.
 
-3. **Frontend (JS/TS/React)** — edit files under `client/`. Either:
-   - Run `docker compose run --rm server npm run watch` in a second terminal, or
-   - Run `docker compose run --rm server npm run build` after each change.
+3. **Frontend (JS/TS/React)** — edit files under `client/`. In a second WSL terminal with Node 12 active, either:
+   - Run `make watch` (rebuild on file changes), or
+   - Run `make build` / `npm run build` after each change.
 
 4. **Dependency changes**:
    - Python (`requirements*.txt`) → `docker compose build` then `docker compose up -d --build`
-   - Node (`package.json` / `package-lock.json`) → `docker compose run --rm server sh -c "npm ci --unsafe-perm && npm run build"`
+   - Node (`package.json` / `package-lock.json`) → `npm ci --unsafe-perm && make build`
 
 ---
 
 ## Optional: faster Docker builds
 
-Skip installing every data-source driver (most local dev does not need them):
+This fork installs only PostgreSQL and SQL Server data-source drivers by default, so a normal `docker compose build` is already lean. To skip even those two drivers (e.g. if you only need the app DB and will add drivers later):
 
 ```bash
 docker compose build --build-arg skip_ds_deps=true
 ```
 
-To bake the frontend into the image **and** still use the dev compose file, you must still run a local/container frontend build because of the `.:/app` volume mount. For a production-like image build without the bind mount, see `.circleci/docker-compose.cypress.yml`.
+To bake the frontend into the image **and** still use the dev compose file, you must still run a local frontend build because of the `.:/app` volume mount. For a production-like image build without the bind mount, see `.circleci/docker-compose.cypress.yml`.
 
 ---
 
@@ -226,13 +267,47 @@ docker compose up -d
 The frontend was not built. Run:
 
 ```bash
-docker compose run --rm server sh -c "npm ci --unsafe-perm && npm run build"
+nvm use 12
+make build
 docker compose restart server
 ```
+
+### `sh: npm: not found` inside the server container
+
+Expected. The `server` image is Python-only; Node is used only during the multi-stage Docker build. Run frontend commands on the host with Node 12 (`make build`, `npm run build`, etc.).
+
+### `EBADENGINE`, `fsevents` platform errors, or `ENOENT ... C:\Windows\package.json`
+
+You are using **Windows npm** from WSL instead of Linux Node via nvm. Fix:
+
+```bash
+source ~/.bashrc
+nvm use 12
+which npm   # must NOT be /mnt/c/Program Files/nodejs/npm
+rm -rf node_modules viz-lib/node_modules
+npm ci --unsafe-perm
+make build
+```
+
+Always run frontend commands from a **WSL terminal**, not PowerShell or CMD.
 
 ### Port already in use (`5000`, `1080`, or `15432`)
 
 Stop whatever is using the port, or change the host mapping in `docker-compose.yml`.
+
+### `docker compose build` fails on pip / `requirements_all_ds.txt`
+
+This fork only installs PostgreSQL and SQL Server drivers in `requirements_all_ds.txt`. If the build still fails, try a clean rebuild:
+
+```bash
+docker compose build --no-cache
+```
+
+To skip data-source drivers entirely:
+
+```bash
+docker compose build --build-arg skip_ds_deps=true
+```
 
 ### Slow file watching / hot reload
 
@@ -240,7 +315,7 @@ Move the repo into the WSL filesystem (`~/repos/...`) instead of `/mnt/c/...`.
 
 ### `docker compose` vs `docker-compose`
 
-Docker Desktop supports both. This guide uses `docker compose` (Compose V2). If you prefer the legacy CLI, substitute `docker-compose` — the Makefile uses that form.
+Docker Desktop supports both. This guide uses `docker compose` (Compose V2). The Makefile uses `docker-compose` — either works.
 
 ### Docker Desktop not using WSL2
 
@@ -252,26 +327,33 @@ Removes containers and Postgres data:
 
 ```bash
 docker compose down -v
-docker compose up -d --build
+docker compose build
+nvm use 12
+npm ci --unsafe-perm
+make build
+docker compose up -d
 docker compose run --rm server create_db
-docker compose run --rm server sh -c "npm ci --unsafe-perm && npm run build"
 ```
 
 ---
 
 ## Quick start (copy-paste)
 
-Run once after cloning:
+Run once after cloning (in a WSL terminal):
 
 ```bash
+# 0. Install Node 12 via nvm (see "Node.js setup" above if not done yet)
+nvm use 12
+
 # 1. Create .env (replace secret with: openssl rand -base64 32)
 echo 'REDASH_COOKIE_SECRET=REPLACE_WITH_A_RANDOM_SECRET' > .env
 
-# 2. Build images
+# 2. Build Docker images
 docker compose build
 
-# 3. Build frontend
-docker compose run --rm server sh -c "npm ci --unsafe-perm && npm run build"
+# 3. Install frontend deps and build
+npm ci --unsafe-perm
+make build
 
 # 4. Start services
 docker compose up -d
@@ -288,8 +370,9 @@ For daily use afterward:
 docker compose up -d
 ```
 
-Optionally, in a second terminal while doing frontend work:
+Optionally, in a second WSL terminal while doing frontend work:
 
 ```bash
-docker compose run --rm server npm run watch
+nvm use 12
+make watch
 ```

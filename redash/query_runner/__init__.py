@@ -226,7 +226,7 @@ class BaseSQLQueryRunner(BaseQueryRunner):
 
     def apply_auto_limit(self, query_text, should_apply_auto_limit):
         if should_apply_auto_limit:
-            from redash.query_runner.databricks import split_sql_statements, combine_sql_statements
+            from redash.query_runner.sql_split import split_sql_statements, combine_sql_statements
             queries = split_sql_statements(query_text)
             # we only check for last one in the list because it is the one that we show result
             last_query = queries[-1]
