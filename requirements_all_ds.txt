@@ -15,8 +15,11 @@ cmem-cmempy==21.2.3
 # dynamo3==0.4.10
 # Pin: 1.0.3+ requires firebolt-sdk>=1.5.0; keep the version the fork has been running.
 firebolt-sqlalchemy==1.0.2
-google-api-python-client==1.7.11
-google-auth>=2.22.0
+# 2.x still ships the `apiclient` shim and accepts oauth2client-authorized
+# httplib2 via build(http=...); bigquery.v2 and analytics.v3 static discovery
+# docs are bundled, so the google query runners work unchanged.
+google-api-python-client==2.190.0
+google-auth>=2.22.0,<3
 gspread==3.1.0
 # ibm_db ships a prebuilt DB2 client driver for x86_64 only.
 ibm-db>=2.0.9; platform_machine == "x86_64"
@@ -31,10 +34,16 @@ openpyxl==3.0.7
 # pandas is needed by the excel/csv query runners (previously pulled in
 # transitively by pymapd, which has been dropped)
 pandas==1.3.4
-phoenixdb==0.7
-protobuf==3.18.3
+# 1.2.2 (upstream v26 pin): phoenixdb 0.7 ships pre-protoc-3.19 generated code that
+# protobuf 6 rejects with a TypeError at import, which escapes the runner's
+# `except ImportError` guard and crashes query-runner loading. 1.2.2 pulls in
+# requests-gssapi/gssapi, which needs libkrb5-dev (added to the Dockerfile).
+phoenixdb==1.2.2
+protobuf==6.33.5
 PyAthena>=1.5.0,<=1.11.5
-pydgraph==2.0.2
+# 25.1.0 (upstream v26 pin): pydgraph 2.0.2's generated code is incompatible with
+# protobuf 6 (TypeError at import, same failure mode as phoenixdb 0.7).
+pydgraph==25.1.0
 pydruid==0.5.7
 pyexasol==0.12.0
 pyhive==0.6.1
@@ -51,7 +60,11 @@ qds-sdk>=1.9.6
 requests_aws_sign==0.1.5
 sasl>=0.1.3
 simple_salesforce==0.74.3
-snowflake-connector-python==3.18.0
+# snowflake 4.x drops the pyOpenSSL<26 cap (and its cffi dependency). It declares
+# requests>=2.32.4, but requests stays pinned at 2.31.0 in requirements.txt (advocate
+# SSRF guard); snowflake vendors its own requests/urllib3, so this is only a pip
+# metadata warning, not a runtime break.
+snowflake-connector-python==4.5.0
 td-client==1.0.0
 thrift==0.16.0
 thrift_sasl>=0.1.0

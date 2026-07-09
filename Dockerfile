@@ -1,10 +1,15 @@
-FROM node:16-bullseye as frontend-builder
+FROM node:16-bullseye AS frontend-builder
 
 # Controls whether to build the frontend assets
 ARG skip_frontend_build
 
 ENV CYPRESS_INSTALL_BINARY=0
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
+
+# This codebase's lockfiles are npm v1 and depend on the `sql-formatter` git
+# dependency, which npm 7+ rebuilds from source and fails on. Pin npm 6 (the
+# version node:12 shipped, which this project was authored against).
+RUN npm install --global --force npm@6.14.18
 
 RUN useradd -m -d /frontend redash
 USER redash
@@ -38,6 +43,8 @@ RUN useradd --create-home redash
 # amd64 packages, so msodbcsql17 is installed on amd64 only (production images are amd64;
 # arm64 is for local development, where the MSSQL ODBC runner degrades to disabled).
 # msodbcsql17 (not 18): the mssql_odbc query runner hardcodes "ODBC Driver 17 for SQL Server".
+# libkrb5-dev: needed to build the gssapi wheel (pulled in by phoenixdb 1.2.2 via
+# requests-gssapi; phoenixdb was bumped for protobuf 6 compatibility).
 RUN set -eux; \
   apt-get update && \
   apt-get install -y --no-install-recommends \
@@ -57,6 +64,7 @@ RUN set -eux; \
     default-libmysqlclient-dev \
     freetds-dev \
     libsasl2-dev \
+    libkrb5-dev \
     unzip \
     libsasl2-modules-gssapi-mit \
     ca-certificates && \
