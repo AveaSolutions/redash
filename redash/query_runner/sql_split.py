@@ -1,6 +1,11 @@
 import sqlparse
 
 
+def _sql_text(value):
+    # sqlparse removed text_type in 0.5.x; str() is the compatible equivalent.
+    return str(value)
+
+
 def split_sql_statements(query):
     def strip_trailing_comments(stmt):
         idx = len(stmt.tokens) - 1
@@ -37,9 +42,12 @@ def split_sql_statements(query):
 
         # copy statement object. `copy.deepcopy` fails to do this, so just re-parse it
         st = sqlparse.engine.FilterStack()
-        stmt = next(st.run(sqlparse.text_type(stmt)))
+        parsed = list(st.run(_sql_text(stmt)))
+        if not parsed:
+            return True
 
-        sql = sqlparse.text_type(strip_comments.process(stmt))
+        stmt = parsed[0]
+        sql = _sql_text(strip_comments.process(stmt))
         return sql.strip() == ""
 
     stack = sqlparse.engine.FilterStack()
@@ -48,7 +56,7 @@ def split_sql_statements(query):
     result = [strip_trailing_comments(stmt) for stmt in result]
     result = [strip_trailing_semicolon(stmt) for stmt in result]
     result = [
-        sqlparse.text_type(stmt).strip()
+        _sql_text(stmt).strip()
         for stmt in result
         if not is_empty_statement(stmt)
     ]
