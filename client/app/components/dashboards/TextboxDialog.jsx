@@ -1,5 +1,5 @@
 import { toString } from "lodash";
-import { markdown } from "markdown";
+import { toHTML as markdownToHTML } from "@/services/markdown";
 import React, { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useDebouncedCallback } from "use-debounce";
@@ -20,11 +20,11 @@ function TextboxDialog({ dialog, isNew, ...props }) {
 
   useEffect(() => {
     setText(props.text);
-    setPreview(markdown.toHTML(props.text));
+    setPreview(markdownToHTML(props.text));
   }, [props.text]);
 
   const [updatePreview] = useDebouncedCallback(() => {
-    setPreview(markdown.toHTML(text));
+    setPreview(markdownToHTML(text));
   }, 200);
 
   const handleInputChange = useCallback(
