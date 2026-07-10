@@ -17,7 +17,8 @@ This document lists code, config, and dependencies that may be safe to **delete 
 | Tier 1 — config / dead code | AO-19388 | **Done** | `f50a5dae` |
 | Tier 4 — alert destinations (Slack/email/webhook only) | AO-19388 | **Done** | `abc34398` |
 | Tier 4 — LDAP auth removal | AO-19388 | **Done** | `abc34398` |
-| Tier 2 — `ptpython` / `manage shell` | AO-19388 | **Done** | *(this commit)* |
+| Tier 4 — unused SSO auth (Google/SAML/remote-user/JWT) | AO-19389 | **Done** | *(this commit)* |
+| Tier 2 — `ptpython` / `manage shell` | AO-19388 | **Done** | `e6f10291` |
 | Tier 2 — other dev deps / tooling | AO-19388 | Open | — |
 | Tier 3 — CircleCI / Restyled | AO-19388 | Needs team confirm | — |
 
@@ -91,6 +92,7 @@ Larger config surfaces. Same *spirit* as Cypress removal, but needs confirmation
 | ~~**Alert destinations**~~ | `redash/destinations/`, `redash/settings/__init__.py` | **Removed** | Prod confirmed: Slack / email / webhook only. HipChat, ChatWork, Mattermost, Hangouts Chat, PagerDuty modules deleted. |
 | ~~**`pypd`**~~ | `requirements.txt` | **Removed** | Was only used by PagerDuty destination. |
 | ~~**LDAP auth**~~ | `redash/authentication/ldap_auth.py`, settings, UI | **Removed** | Never used in Avea environments; previously hard-disabled for GHSA-32fw-wc7f-7qg9. |
+| ~~**SSO auth (Google OAuth, SAML, remote-user, JWT login)**~~ | `redash/authentication/`, settings, UI, Dockerfile | **Removed** | kipu-rcm uses API key auth only (`Authorization: Key`). Dropped `Authlib`, `pysaml2`, `PyJWT`, `xmlsec1`. Password + API key/HMAC kept. |
 
 ---
 

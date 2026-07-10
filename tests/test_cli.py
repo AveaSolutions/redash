@@ -338,33 +338,6 @@ class GroupCommandTests(BaseTestCase):
 
 
 class OrganizationCommandTests(BaseTestCase):
-    def test_set_google_apps_domains(self):
-        domains = ["example.org", "example.com"]
-        runner = CliRunner()
-        result = runner.invoke(
-            manager, ["org", "set_google_apps_domains", ",".join(domains)]
-        )
-        self.assertFalse(result.exception)
-        self.assertEqual(result.exit_code, 0)
-        db.session.add(self.factory.org)
-        self.assertEqual(self.factory.org.google_apps_domains, domains)
-
-    def test_show_google_apps_domains(self):
-        self.factory.org.settings[Organization.SETTING_GOOGLE_APPS_DOMAINS] = [
-            "example.org",
-            "example.com",
-        ]
-        db.session.add(self.factory.org)
-        db.session.commit()
-        runner = CliRunner()
-        result = runner.invoke(manager, ["org", "show_google_apps_domains"])
-        self.assertFalse(result.exception)
-        self.assertEqual(result.exit_code, 0)
-        output = """
-        Current list of Google Apps domains: example.org, example.com
-        """
-        self.assertMultiLineEqual(result.output, textwrap.dedent(output).lstrip())
-
     def test_list(self):
         self.factory.create_org(name="test", slug="test_org")
         self.factory.create_org(name="Borg", slug="B_org")
@@ -428,19 +401,6 @@ class UserCommandTests(BaseTestCase):
         self.assertEqual(u.name, "Fred Foobar")
         self.assertTrue(u.verify_password("password1"))
         self.assertEqual(u.group_ids, [u.org.default_group.id, u.org.admin_group.id])
-
-    def test_create_googleauth(self):
-        runner = CliRunner()
-        result = runner.invoke(
-            manager,
-            ["users", "create", "foobar@example.com", "Fred Foobar", "--google"],
-        )
-        self.assertFalse(result.exception)
-        self.assertEqual(result.exit_code, 0)
-        u = User.query.filter(User.email == "foobar@example.com").first()
-        self.assertEqual(u.name, "Fred Foobar")
-        self.assertIsNone(u.password_hash)
-        self.assertEqual(u.group_ids, [u.org.default_group.id])
 
     def test_create_bad(self):
         self.factory.create_user(email="foobar@example.com")

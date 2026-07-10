@@ -167,51 +167,6 @@ FEATURE_POLICY = os.environ.get("REDASH_REFERRER_POLICY", "")
 
 MULTI_ORG = parse_boolean(os.environ.get("REDASH_MULTI_ORG", "false"))
 
-GOOGLE_CLIENT_ID = os.environ.get("REDASH_GOOGLE_CLIENT_ID", "")
-GOOGLE_CLIENT_SECRET = os.environ.get("REDASH_GOOGLE_CLIENT_SECRET", "")
-GOOGLE_OAUTH_ENABLED = bool(GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET)
-
-# If Redash is behind a proxy it might sometimes receive a X-Forwarded-Proto of HTTP
-# even if your actual Redash URL scheme is HTTPS. This will cause Flask to build
-# the SAML redirect URL incorrect thus failing auth. This is especially common if
-# you're behind a SSL/TCP configured AWS ELB or similar.
-# This setting will force the URL scheme.
-SAML_SCHEME_OVERRIDE = os.environ.get("REDASH_SAML_SCHEME_OVERRIDE", "")
-
-SAML_ENCRYPTION_PEM_PATH = os.environ.get("REDASH_SAML_ENCRYPTION_PEM_PATH", "")
-SAML_ENCRYPTION_CERT_PATH = os.environ.get("REDASH_SAML_ENCRYPTION_CERT_PATH", "")
-SAML_ENCRYPTION_ENABLED = SAML_ENCRYPTION_PEM_PATH != "" and SAML_ENCRYPTION_CERT_PATH != ""
-
-# Enables the use of an externally-provided and trusted remote user via an HTTP
-# header.  The "user" must be an email address.
-#
-# By default the trusted header is X-Forwarded-Remote-User.  You can change
-# this by setting REDASH_REMOTE_USER_HEADER.
-#
-# Enabling this authentication method is *potentially dangerous*, and it is
-# your responsibility to ensure that only a trusted frontend (usually on the
-# same server) can talk to the redash backend server, otherwise people will be
-# able to login as anyone they want by directly talking to the redash backend.
-# You must *also* ensure that any special header in the original request is
-# removed or always overwritten by your frontend, otherwise your frontend may
-# pass it through to the backend unchanged.
-#
-# Note that redash will only check the remote user once, upon the first need
-# for a login, and then set a cookie which keeps the user logged in.  Dropping
-# the remote user header after subsequent requests won't automatically log the
-# user out.  Doing so could be done with further work, but usually it's
-# unnecessary.
-#
-# If you also set the organization setting auth_password_login_enabled to false,
-# then your authentication will be seamless.  Otherwise a link will be presented
-# on the login page to trigger remote user auth.
-REMOTE_USER_LOGIN_ENABLED = parse_boolean(
-    os.environ.get("REDASH_REMOTE_USER_LOGIN_ENABLED", "false")
-)
-REMOTE_USER_HEADER = os.environ.get(
-    "REDASH_REMOTE_USER_HEADER", "X-Forwarded-Remote-User"
-)
-
 STATIC_ASSETS_PATH = fix_assets_path(
     os.environ.get("REDASH_STATIC_ASSETS_PATH", "../client/dist/")
 )

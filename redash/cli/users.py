@@ -65,17 +65,10 @@ def grant_admin(email, organization="default"):
 )
 @option("--admin", "is_admin", is_flag=True, default=False, help="set user as admin")
 @option(
-    "--google",
-    "google_auth",
-    is_flag=True,
-    default=False,
-    help="user uses Google Auth to login",
-)
-@option(
     "--password",
     "password",
     default=None,
-    help="Password for users who don't use Google Auth " "(leave blank for prompt).",
+    help="Password (leave blank for prompt).",
 )
 @option(
     "--groups",
@@ -88,7 +81,6 @@ def create(
     name,
     groups,
     is_admin=False,
-    google_auth=False,
     password=None,
     organization="default",
 ):
@@ -96,17 +88,15 @@ def create(
     Create user EMAIL with display name NAME.
     """
     print("Creating user (%s, %s) in organization %s..." % (email, name, organization))
-    print("Admin: %r" % is_admin)
-    print("Login with Google Auth: %r\n" % google_auth)
+    print("Admin: %r\n" % is_admin)
 
     org = models.Organization.get_by_slug(organization)
     groups = build_groups(org, groups, is_admin)
 
     user = models.User(org=org, email=email, name=name, group_ids=groups)
-    if not password and not google_auth:
+    if not password:
         password = prompt("Password", hide_input=True, confirmation_prompt=True)
-    if not google_auth:
-        user.hash_password(password)
+    user.hash_password(password)
 
     try:
         models.db.session.add(user)
@@ -126,20 +116,12 @@ def create(
     help="The organization the root user belongs to (leave blank for 'default').",
 )
 @option(
-    "--google",
-    "google_auth",
-    is_flag=True,
-    default=False,
-    help="user uses Google Auth to login",
-)
-@option(
     "--password",
     "password",
     default=None,
-    help="Password for root user who don't use Google Auth "
-    "(leave blank for prompt).",
+    help="Password for root user (leave blank for prompt).",
 )
-def create_root(email, name, google_auth=False, password=None, organization="default"):
+def create_root(email, name, password=None, organization="default"):
     """
     Create root user.
     """
@@ -147,7 +129,6 @@ def create_root(email, name, google_auth=False, password=None, organization="def
         "Creating root user (%s, %s) in organization %s..."
         % (email, name, organization)
     )
-    print("Login with Google Auth: %r\n" % google_auth)
 
     user = models.User.query.filter(models.User.email == email).first()
     if user is not None:
@@ -181,8 +162,9 @@ def create_root(email, name, google_auth=False, password=None, organization="def
         name=name,
         group_ids=[admin_group.id, default_group.id],
     )
-    if not google_auth:
-        user.hash_password(password)
+    if not password:
+        password = prompt("Password", hide_input=True, confirmation_prompt=True)
+    user.hash_password(password)
 
     try:
         models.db.session.add(user)

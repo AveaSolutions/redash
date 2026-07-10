@@ -56,7 +56,6 @@ RUN set -eux; \
     libpq-dev \
     g++ \
     unixodbc-dev \
-    xmlsec1 \
     libssl-dev \
     freetds-dev \
     ca-certificates && \
