@@ -1,0 +1,180 @@
+number	severity	ecosystem	package	scope	manifest	triage	summary
+2	high	npm	js-yaml	development	package-lock.json	dev-toolchain	Code Injection in js-yaml
+4	high	npm	handlebars	development	package-lock.json	dev-toolchain	Prototype Pollution in handlebars
+6	critical	npm	mixin-deep	development	package-lock.json	dev-toolchain	Prototype Pollution in mixin-deep
+7	critical	npm	set-value	development	package-lock.json	dev-toolchain	Prototype Pollution in set-value
+10	medium	npm	minimist	development	package-lock.json	dev-toolchain	Prototype Pollution in minimist
+14	high	npm	elliptic	runtime	package-lock.json	dev-or-transitive	Signature Malleabillity in elliptic
+15	high	npm	serialize-javascript	runtime	package-lock.json	dev-or-transitive	Insecure serialization leading to RCE in serialize-javascript
+17	high	npm	handlebars	development	package-lock.json	dev-toolchain	Arbitrary Code Execution in handlebars
+18	high	npm	handlebars	development	package-lock.json	dev-toolchain	Prototype Pollution in handlebars
+19	high	npm	handlebars	development	package-lock.json	dev-toolchain	Arbitrary Code Execution in handlebars
+22	medium	npm	yargs-parser	development	package-lock.json	dev-toolchain	yargs-parser Vulnerable to Prototype Pollution
+26	high	npm	ini	runtime	package-lock.json	dev-or-transitive	ini before 1.3.6 vulnerable to Prototype Pollution via ini.parse
+28	medium	npm	node-notifier	runtime	package-lock.json	dev-or-transitive	OS Command Injection in node-notifier
+30	medium	npm	elliptic	runtime	package-lock.json	dev-or-transitive	Elliptic Uses a Broken or Risky Cryptographic Algorithm
+31	high	npm	y18n	runtime	package-lock.json	dev-or-transitive	Prototype Pollution in y18n
+33	high	npm	merge	development	package-lock.json	dev-toolchain	Prototype Pollution in merge
+36	high	npm	lodash	development	package-lock.json	dev-toolchain	Command Injection in lodash
+37	critical	npm	handlebars	development	package-lock.json	dev-toolchain	Remote code execution in handlebars when compiling templates
+38	high	npm	ssri	runtime	package-lock.json	dev-or-transitive	Regular Expression Denial of Service (ReDoS)
+41	medium	npm	hosted-git-info	runtime	package-lock.json	dev-or-transitive	Regular Expression Denial of Service in hosted-git-info
+42	medium	npm	browserslist	runtime	package-lock.json	dev-or-transitive	Regular Expression Denial of Service in browserslist
+47	medium	npm	path-parse	runtime	package-lock.json	dev-or-transitive	Regular Expression Denial of Service in path-parse
+50	high	npm	tmpl	runtime	package-lock.json	dev-or-transitive	tmpl vulnerable to Inefficient Regular Expression Complexity which may lead to resource exhaustion
+51	high	npm	nth-check	runtime	package-lock.json	dev-or-transitive	Inefficient Regular Expression Complexity in nth-check
+52	medium	npm	ws	runtime	package-lock.json	dev-or-transitive	ReDoS in Sec-Websocket-Protocol header
+53	high	npm	set-value	development	package-lock.json	dev-toolchain	Prototype Pollution in set-value
+54	critical	npm	json-schema	runtime	package-lock.json	dev-or-transitive	json-schema is vulnerable to Prototype Pollution
+71	high	npm	ini	development	viz-lib/package-lock.json	dev-toolchain	ini before 1.3.6 vulnerable to Prototype Pollution via ini.parse
+73	medium	npm	node-notifier	development	viz-lib/package-lock.json	dev-toolchain	OS Command Injection in node-notifier
+76	high	npm	y18n	development	viz-lib/package-lock.json	dev-toolchain	Prototype Pollution in y18n
+83	medium	npm	path-parse	runtime	viz-lib/package-lock.json	dev-or-transitive	Regular Expression Denial of Service in path-parse
+87	medium	npm	ws	development	viz-lib/package-lock.json	dev-toolchain	ReDoS in Sec-Websocket-Protocol header
+89	critical	npm	json-schema	development	viz-lib/package-lock.json	dev-toolchain	json-schema is vulnerable to Prototype Pollution
+97	high	npm	handlebars	development	package-lock.json	dev-toolchain	Arbitrary Code Execution in Handlebars
+98	critical	npm	handlebars	development	package-lock.json	dev-toolchain	Prototype Pollution in handlebars
+99	medium	npm	ajv	development	viz-lib/package-lock.json	dev-toolchain	Prototype Pollution in Ajv
+100	medium	npm	ajv	runtime	package-lock.json	dev-or-transitive	Prototype Pollution in Ajv
+120	high	npm	async	development	package-lock.json	dev-toolchain	Prototype Pollution in async
+127	high	npm	terser	runtime	package-lock.json	dev-or-transitive	Terser insecure use of regular expressions leads to ReDoS
+133	high	npm	minimatch	runtime	package-lock.json	dev-or-transitive	minimatch ReDoS vulnerability
+134	critical	npm	loader-utils	runtime	package-lock.json	dev-or-transitive	Prototype pollution in webpack loader-utils
+135	critical	npm	loader-utils	development	viz-lib/package-lock.json	dev-toolchain	Prototype pollution in webpack loader-utils
+136	high	npm	loader-utils	runtime	package-lock.json	dev-or-transitive	loader-utils is vulnerable to Regular Expression Denial of Service (ReDoS)
+137	high	npm	loader-utils	runtime	package-lock.json	dev-or-transitive	loader-utils is vulnerable to Regular Expression Denial of Service (ReDoS) via url variable
+140	high	npm	decode-uri-component	development	viz-lib/package-lock.json	dev-toolchain	decode-uri-component vulnerable to Denial of Service (DoS)
+141	high	npm	decode-uri-component	runtime	package-lock.json	dev-or-transitive	decode-uri-component vulnerable to Denial of Service (DoS)
+143	high	npm	qs	development	viz-lib/package-lock.json	dev-toolchain	qs vulnerable to Prototype Pollution
+144	high	npm	json5	development	viz-lib/package-lock.json	dev-toolchain	Prototype Pollution in JSON5 via Parse Method
+145	high	npm	json5	runtime	package-lock.json	dev-or-transitive	Prototype Pollution in JSON5 via Parse Method
+151	critical	npm	minimist	runtime	package-lock.json	dev-or-transitive	Prototype Pollution in minimist
+152	critical	npm	minimist	runtime	viz-lib/package-lock.json	dev-or-transitive	Prototype Pollution in minimist
+153	medium	npm	request	runtime	package-lock.json	dev-or-transitive	Server-Side Request Forgery in Request
+154	medium	npm	request	development	viz-lib/package-lock.json	dev-toolchain	Server-Side Request Forgery in Request
+165	medium	npm	minimist	development	package-lock.json	dev-toolchain	Prototype Pollution in minimist
+177	medium	npm	postcss	runtime	package-lock.json	dev-or-transitive	Regular Expression Denial of Service in postcss
+180	low	npm	markdown	runtime	package-lock.json	runtime-frontend	Regular Expression Denial of Service in markdown
+181	high	npm	ansi-regex	runtime	package-lock.json	dev-or-transitive	Inefficient Regular Expression Complexity in chalk/ansi-regex
+182	high	npm	ansi-regex	runtime	package-lock.json	dev-or-transitive	Inefficient Regular Expression Complexity in chalk/ansi-regex
+183	high	npm	ansi-regex	runtime	package-lock.json	dev-or-transitive	Inefficient Regular Expression Complexity in chalk/ansi-regex
+187	high	npm	qs	runtime	package-lock.json	dev-or-transitive	qs vulnerable to Prototype Pollution
+188	high	npm	json5	runtime	package-lock.json	dev-or-transitive	Prototype Pollution in JSON5 via Parse Method
+189	critical	npm	minimist	development	package-lock.json	dev-toolchain	Prototype Pollution in minimist
+194	high	npm	tar	development	viz-lib/package-lock.json	dev-toolchain	Arbitrary File Creation/Overwrite via insufficient symlink protection due to directory cache poisoning
+195	high	npm	tar	development	viz-lib/package-lock.json	dev-toolchain	Arbitrary File Creation/Overwrite due to insufficient absolute path sanitization
+198	high	npm	tar	development	viz-lib/package-lock.json	dev-toolchain	Arbitrary File Creation/Overwrite on Windows via insufficient relative path sanitization
+201	high	npm	ansi-regex	development	viz-lib/package-lock.json	dev-toolchain	Inefficient Regular Expression Complexity in chalk/ansi-regex
+202	high	npm	ansi-regex	development	viz-lib/package-lock.json	dev-toolchain	Inefficient Regular Expression Complexity in chalk/ansi-regex
+208	high	npm	json5	development	viz-lib/package-lock.json	dev-toolchain	Prototype Pollution in JSON5 via Parse Method
+217	medium	npm	tough-cookie	development	viz-lib/package-lock.json	dev-toolchain	tough-cookie Prototype Pollution vulnerability
+218	medium	npm	tough-cookie	runtime	package-lock.json	dev-or-transitive	tough-cookie Prototype Pollution vulnerability
+224	medium	npm	word-wrap	runtime	package-lock.json	dev-or-transitive	word-wrap vulnerable to Regular Expression Denial of Service
+409	critical	npm	loader-utils	runtime	package-lock.json	dev-or-transitive	Prototype pollution in webpack loader-utils
+410	high	npm	loader-utils	runtime	package-lock.json	dev-or-transitive	loader-utils is vulnerable to Regular Expression Denial of Service (ReDoS)
+411	high	npm	loader-utils	runtime	package-lock.json	dev-or-transitive	loader-utils is vulnerable to Regular Expression Denial of Service (ReDoS) via url variable
+413	high	npm	semver	runtime	package-lock.json	dev-or-transitive	semver vulnerable to Regular Expression Denial of Service
+414	high	npm	semver	runtime	package-lock.json	dev-or-transitive	semver vulnerable to Regular Expression Denial of Service
+416	high	npm	ansi-regex	development	viz-lib/package-lock.json	dev-toolchain	Inefficient Regular Expression Complexity in chalk/ansi-regex
+431	low	npm	debug	runtime	package-lock.json	runtime-frontend	Regular Expression Denial of Service in debug
+433	medium	npm	postcss	runtime	package-lock.json	dev-or-transitive	PostCSS line return parsing error
+436	medium	npm	postcss	development	viz-lib/package-lock.json	dev-toolchain	PostCSS line return parsing error
+438	critical	npm	@babel/traverse	development	package-lock.json	dev-toolchain	Babel vulnerable to arbitrary code execution when compiling specifically crafted malicious code
+445	high	npm	lodash	development	package-lock.json	dev-toolchain	Prototype Pollution in lodash
+456	critical	npm	handlebars	development	package-lock.json	dev-toolchain	Prototype Pollution in handlebars
+471	high	npm	tar	development	viz-lib/package-lock.json	dev-toolchain	Arbitrary File Creation/Overwrite via insufficient symlink protection due to directory cache poisoning using symbolic li
+475	high	npm	tar	development	viz-lib/package-lock.json	dev-toolchain	Arbitrary File Creation/Overwrite via insufficient symlink protection due to directory cache poisoning using symbolic li
+500	critical	npm	babel-traverse	development	package-lock.json	dev-toolchain	Babel vulnerable to arbitrary code execution when compiling specifically crafted malicious code
+519	high	pip	Werkzeug	runtime	requirements.txt	held-flask3	Werkzeug debugger vulnerable to remote execution when interacting with attacker controlled domain
+532	high	npm	braces	runtime	package-lock.json	dev-or-transitive	Uncontrolled resource consumption in braces
+533	high	npm	braces	development	viz-lib/package-lock.json	dev-toolchain	Uncontrolled resource consumption in braces
+535	high	npm	ws	runtime	package-lock.json	dev-or-transitive	ws affected by a DoS when handling a request with many HTTP headers
+536	high	npm	ws	development	viz-lib/package-lock.json	dev-toolchain	ws affected by a DoS when handling a request with many HTTP headers
+542	high	npm	glob-parent	runtime	package-lock.json	dev-or-transitive	glob-parent vulnerable to Regular Expression Denial of Service in enclosure regex
+551	low	npm	elliptic	runtime	package-lock.json	dev-or-transitive	Elliptic's EDDSA missing signature length check
+552	low	npm	elliptic	runtime	package-lock.json	dev-or-transitive	Elliptic allows BER-encoded signatures
+553	low	npm	elliptic	runtime	package-lock.json	dev-or-transitive	Elliptic's ECDSA missing check for whether leading bit of r and s is zero
+564	medium	npm	micromatch	runtime	package-lock.json	dev-or-transitive	Regular Expression Denial of Service (ReDoS) in micromatch
+589	low	npm	elliptic	runtime	package-lock.json	dev-or-transitive	Elliptic's verify function omits uniqueness validation
+603	medium	pip	Werkzeug	runtime	requirements.txt	held-flask3	Werkzeug safe_join not safe on Windows
+608	low	npm	elliptic	runtime	package-lock.json	dev-or-transitive	Valid ECDSA signatures erroneously rejected in Elliptic
+618	high	npm	cross-spawn	runtime	package-lock.json	dev-or-transitive	Regular Expression Denial of Service (ReDoS) in cross-spawn
+622	high	npm	cross-spawn	runtime	package-lock.json	dev-or-transitive	Regular Expression Denial of Service (ReDoS) in cross-spawn
+638	critical	npm	elliptic	runtime	package-lock.json	dev-or-transitive	Elliptic's private key extraction in ECDSA upon signing a malformed input (e.g. a string)
+659	medium	npm	webpack-dev-server	development	package-lock.json	dev-toolchain	webpack-dev-server users' source code may be stolen when they access a malicious web site
+660	medium	npm	webpack-dev-server	development	package-lock.json	dev-toolchain	webpack-dev-server users' source code may be stolen when they access a malicious web site with non-Chromium based browse
+674	critical	npm	pbkdf2	runtime	package-lock.json	dev-or-transitive	pbkdf2 returns predictable uninitialized/zero-filled memory for non-normalized or unimplemented algos
+676	critical	npm	form-data	development	viz-lib/package-lock.json	dev-toolchain	form-data uses unsafe random function in form-data for choosing boundary
+677	critical	npm	form-data	runtime	package-lock.json	dev-or-transitive	form-data uses unsafe random function in form-data for choosing boundary
+678	low	npm	tmp	development	package-lock.json	dev-toolchain	tmp allows arbitrary temporary file / directory write via symbolic link `dir` parameter
+680	critical	npm	sha.js	runtime	package-lock.json	dev-or-transitive	sha.js is missing type checks leading to hash rewind and passing on crafted data
+682	critical	npm	cipher-base	runtime	package-lock.json	dev-or-transitive	cipher-base is missing type checks, leading to hash rewind and passing on crafted data
+684	critical	npm	shell-quote	development	viz-lib/package-lock.json	dev-toolchain	Improper Neutralization of Special Elements used in a Command in Shell-quote
+685	critical	npm	shell-quote	runtime	package-lock.json	dev-or-transitive	Improper Neutralization of Special Elements used in a Command in Shell-quote
+690	medium	npm	bootstrap	runtime	package-lock.json	runtime-frontend	Bootstrap Vulnerable to Cross-Site Scripting in its Popover and Tooltip Components
+693	medium	npm	bootstrap	runtime	package-lock.json	runtime-frontend	Bootstrap Cross-Site Scripting (XSS) vulnerability for data-* attributes
+708	medium	npm	js-yaml	runtime	package-lock.json	dev-or-transitive	js-yaml has prototype pollution in merge (<<)
+709	medium	npm	js-yaml	development	viz-lib/package-lock.json	dev-toolchain	js-yaml has prototype pollution in merge (<<)
+713	medium	pip	werkzeug	runtime	requirements.txt	held-flask3	Werkzeug safe_join() allows Windows special device names
+719	medium	npm	qs	runtime	package-lock.json	dev-or-transitive	qs's arrayLimit bypass in its bracket notation allows DoS via memory exhaustion
+720	medium	npm	qs	development	viz-lib/package-lock.json	dev-toolchain	qs's arrayLimit bypass in its bracket notation allows DoS via memory exhaustion
+723	medium	pip	Werkzeug	runtime	requirements.txt	held-flask3	 Werkzeug safe_join() allows Windows special device names with compound extensions
+728	low	npm	elliptic	runtime	package-lock.json	dev-or-transitive	Elliptic Uses a Cryptographic Primitive with a Risky Implementation
+731	high	npm	tar	development	viz-lib/package-lock.json	dev-toolchain	node-tar is Vulnerable to Arbitrary File Overwrite and Symlink Poisoning via Insufficient Path Sanitization
+732	high	npm	tar	development	viz-lib/package-lock.json	dev-toolchain	Race Condition in node-tar Path Reservations via Unicode Ligature Collisions on macOS APFS
+735	medium	npm	lodash	development	package-lock.json	dev-toolchain	Lodash has Prototype Pollution Vulnerability in `_.unset` and `_.omit` functions
+737	high	npm	tar	development	viz-lib/package-lock.json	dev-toolchain	node-tar Vulnerable to Arbitrary File Creation/Overwrite via Hardlink Path Traversal
+745	high	npm	semver	runtime	package-lock.json	dev-or-transitive	semver vulnerable to Regular Expression Denial of Service
+758	critical	npm	pbkdf2	runtime	package-lock.json	dev-or-transitive	pbkdf2 silently disregards Uint8Array input, returning static keys
+759	high	npm	tar	development	viz-lib/package-lock.json	dev-toolchain	Arbitrary File Read/Write via Hardlink Target Escape Through Symlink Chain in node-tar Extraction
+764	medium	pip	werkzeug	runtime	requirements.txt	held-flask3	 Werkzeug safe_join() allows Windows special device names
+765	low	pip	flask	runtime	requirements.txt	held-flask3	Flask session does not add `Vary: Cookie` header when accessed in some ways
+772	medium	npm	ajv	runtime	package-lock.json	dev-or-transitive	ajv has ReDoS when using `$data` option
+778	medium	npm	bn.js	runtime	package-lock.json	dev-or-transitive	bn.js affected by an infinite loop
+780	high	npm	minimatch	runtime	package-lock.json	dev-or-transitive	minimatch has a ReDoS via repeated wildcards with non-matching literal in pattern
+781	high	npm	serialize-javascript	runtime	package-lock.json	dev-or-transitive	Serialize JavaScript is Vulnerable to RCE via RegExp.flags and Date.prototype.toISOString()
+783	high	npm	minimatch	runtime	package-lock.json	dev-or-transitive	minimatch ReDoS: nested *() extglobs generate catastrophically backtracking regular expressions
+784	high	npm	minimatch	development	viz-lib/package-lock.json	dev-toolchain	minimatch has ReDoS: matchOne() combinatorial backtracking via multiple non-adjacent GLOBSTAR segments
+785	high	npm	minimatch	runtime	package-lock.json	dev-or-transitive	minimatch has ReDoS: matchOne() combinatorial backtracking via multiple non-adjacent GLOBSTAR segments
+787	high	npm	tar	development	viz-lib/package-lock.json	dev-toolchain	tar has Hardlink Path Traversal via Drive-Relative Linkpath
+788	high	npm	tar	development	viz-lib/package-lock.json	dev-toolchain	node-tar Symlink Path Traversal via Drive-Relative Linkpath
+793	high	npm	flatted	runtime	package-lock.json	dev-or-transitive	flatted vulnerable to unbounded recursion DoS in parse() revive phase
+805	high	npm	flatted	runtime	package-lock.json	dev-or-transitive	Prototype Pollution via parse() in NodeJS flatted
+807	medium	pip	requests	runtime	requirements.txt	check-resolved	Requests has Insecure Temp File Reuse in its extract_zipped_paths() utility function
+809	medium	npm	handlebars	development	package-lock.json	dev-toolchain	Handlebars.js has Prototype Pollution Leading to XSS through Partial Template Injection
+820	high	npm	handlebars	development	package-lock.json	dev-toolchain	Handlebars.js has JavaScript Injection via AST Type Confusion when passing an object as dynamic partial
+821	high	npm	handlebars	development	package-lock.json	dev-toolchain	Handlebars.js has JavaScript Injection in CLI Precompiler via Unescaped Names and Options
+822	critical	npm	handlebars	development	package-lock.json	dev-toolchain	Handlebars.js has JavaScript Injection via AST Type Confusion
+823	high	npm	handlebars	development	package-lock.json	dev-toolchain	Handlebars.js has JavaScript Injection via AST Type Confusion by tampering @partial-block
+828	low	npm	handlebars	development	package-lock.json	dev-toolchain	Handlebars.js has a Property Access Validation Bypass in container.lookup
+840	high	npm	picomatch	runtime	package-lock.json	dev-or-transitive	Picomatch has a ReDoS vulnerability via extglob quantifiers
+843	medium	npm	picomatch	runtime	package-lock.json	dev-or-transitive	Picomatch: Method Injection in POSIX Character Classes causes incorrect Glob Matching
+844	medium	npm	lodash	development	package-lock.json	dev-toolchain	lodash vulnerable to Prototype Pollution via array path bypass in `_.unset` and `_.omit`
+845	high	npm	lodash	development	package-lock.json	dev-toolchain	lodash vulnerable to Code Injection via `_.template` imports key names
+870	medium	npm	@babel/helpers	runtime	package-lock.json	dev-or-transitive	Babel has inefficient RegExp complexity in generated code with .replace when transpiling named capturing groups
+871	medium	npm	@babel/runtime	runtime	package-lock.json	dev-or-transitive	Babel has inefficient RegExp complexity in generated code with .replace when transpiling named capturing groups
+873	low	npm	brace-expansion	runtime	package-lock.json	dev-or-transitive	brace-expansion Regular Expression Denial of Service vulnerability
+874	medium	npm	brace-expansion	runtime	package-lock.json	dev-or-transitive	brace-expansion: Zero-step sequence causes process hang and memory exhaustion
+876	medium	npm	@babel/runtime	runtime	viz-lib/package-lock.json	dev-or-transitive	Babel has inefficient RegExp complexity in generated code with .replace when transpiling named capturing groups
+949	medium	npm	webpack-dev-server	development	package-lock.json	dev-toolchain	webpack-dev-server vulnerable to cross-origin source code exposure on non-HTTPS origins
+954	medium	npm	uuid	development	viz-lib/package-lock.json	dev-toolchain	uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided
+955	medium	npm	uuid	runtime	package-lock.json	dev-or-transitive	uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided
+956	high	npm	tmp	development	package-lock.json	dev-toolchain	tmp has Path Traversal via unsanitized prefix/postfix that enables directory escape
+964	medium	npm	postcss	runtime	package-lock.json	dev-or-transitive	PostCSS has XSS via Unescaped </style> in its CSS Stringify Output
+985	critical	npm	shell-quote	development	viz-lib/package-lock.json	dev-toolchain	shell-quote quote() does not escape newlines in object .op values
+986	critical	npm	shell-quote	runtime	package-lock.json	dev-or-transitive	shell-quote quote() does not escape newlines in object .op values
+987	medium	npm	postcss	development	viz-lib/package-lock.json	dev-toolchain	PostCSS has XSS via Unescaped </style> in its CSS Stringify Output
+989	high	npm	form-data	development	viz-lib/package-lock.json	dev-toolchain	form-data: CRLF injection in form-data via unescaped multipart field names and filenames
+990	high	npm	form-data	runtime	package-lock.json	dev-or-transitive	form-data: CRLF injection in form-data via unescaped multipart field names and filenames
+1021	high	npm	ws	runtime	package-lock.json	dev-or-transitive	ws: Memory exhaustion DoS from tiny fragments and data chunks
+1024	high	npm	ws	development	viz-lib/package-lock.json	dev-toolchain	ws: Memory exhaustion DoS from tiny fragments and data chunks
+1029	medium	npm	webpack-dev-server	development	package-lock.json	dev-toolchain	webpack-dev-server vulnerable to HMR WebSocket interception via permissive user proxies
+1030	medium	npm	tar	development	viz-lib/package-lock.json	dev-toolchain	node-tar applies PAX size override to intermediary GNU long-name/long-link headers, causing tar parser interpretation di
+1034	low	npm	@babel/core	runtime	package-lock.json	dev-or-transitive	@babel/core: Arbitrary File Read via sourceMappingURL Comment
+1035	low	npm	@babel/core	development	viz-lib/package-lock.json	dev-toolchain	@babel/core: Arbitrary File Read via sourceMappingURL Comment
+1039	medium	npm	js-yaml	runtime	package-lock.json	dev-or-transitive	JS-YAML: Quadratic-complexity DoS in merge key handling via repeated aliases
+1040	medium	npm	js-yaml	development	viz-lib/package-lock.json	dev-toolchain	JS-YAML: Quadratic-complexity DoS in merge key handling via repeated aliases
+1042	medium	npm	postcss	runtime	package-lock.json	dev-or-transitive	Regular Expression Denial of Service in postcss
+1043	medium	npm	bn.js	runtime	package-lock.json	dev-or-transitive	bn.js affected by an infinite loop
+1051	medium	pip	Werkzeug	runtime	requirements.txt	held-flask3	Werkzeug possible resource exhaustion when parsing file data in forms
+1052	medium	npm	serialize-javascript	development	package-lock.json	dev-toolchain	Serialize JavaScript has CPU Exhaustion Denial of Service via crafted array-like objects

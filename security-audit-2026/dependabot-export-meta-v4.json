@@ -1,0 +1,10 @@
+{
+  "exported_at": "2026-07-10T17:23:20Z",
+  "repo": "AveaSolutions/redash",
+  "state": "open",
+  "local_commit": "48600ef5",
+  "alert_count": 179,
+  "prior_export": "dependabot-open-v3.json",
+  "prior_count": 255,
+  "delta": -76
+}
