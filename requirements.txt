@@ -1,8 +1,5 @@
 advocate==1.0.0
 aniso8601==8.0.0
-# Uncomment the requirement for ldap3 if using ldap.
-# It is not included by default because of the GPL license conflict.
-# ldap3==2.2.4
 Authlib==1.7.2
 blinker==1.6.2
 # cffi 2.x: cryptography 48.x requires cffi>=2.0. This file is installed last, so it
@@ -40,7 +37,6 @@ pyOpenSSL==26.2.0
 # Pin pyparsing to the 2.x line: pyparsing 3.x breaks SQLAlchemy-Searchable 0.10.6.
 # 2.4.7 is the newest 2.x and also satisfies httplib2 (which needs >=2.4.2,<3).
 pyparsing==2.4.7
-pypd==1.1.0
 pysaml2==7.3.1
 pystache==0.6.0
 python-dateutil==2.8.2

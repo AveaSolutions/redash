@@ -6,7 +6,7 @@
 <div class="fixed-width-page">
   <div class="bg-white tiled">
     <div class="m-b-25">
-      {% if show_google_openid or show_saml_login or show_remote_user_login or show_ldap_login %}
+      {% if show_google_openid or show_saml_login or show_remote_user_login %}
         To create your account, please choose a password or login with your SSO provider.
       {% else %}
         To create your account, please choose a password.
@@ -36,11 +36,7 @@
       <a href="{{ url_for('remote_user_auth.login') }}" class="login-button btn btn-default btn-block">Remote User Login</a>
     {% endif %}
 
-    {% if show_ldap_login %}
-      <a href="{{ url_for('ldap_auth.login') }}" class="login-button btn btn-default btn-block">LDAP/SSO Login</a>
-    {% endif %}
-
-    {% if show_google_openid or show_saml_login or show_remote_user_login or show_ldap_login %}
+    {% if show_google_openid or show_saml_login or show_remote_user_login %}
       <hr>
     {% endif %}
 

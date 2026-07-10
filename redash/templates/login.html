@@ -28,12 +28,8 @@
       <a href="{{ url_for('remote_user_auth.login', org_slug=org_slug, next=next) }}" class="login-button btn btn-default btn-block">Remote User Login</a>
     {% endif %}
 
-    {% if show_ldap_login %}
-      <a href="{{ url_for('ldap_auth.login', org_slug=org_slug, next=next) }}" class="login-button btn btn-default btn-block">LDAP/SSO Login</a>
-    {% endif %}
-
     {% if show_password_login %}
-    {% if show_google_openid or show_saml_login or show_remote_user_login or show_ldap_login %}
+    {% if show_google_openid or show_saml_login or show_remote_user_login %}
       <hr>
     {% endif %}
 

@@ -212,35 +212,6 @@ REMOTE_USER_HEADER = os.environ.get(
     "REDASH_REMOTE_USER_HEADER", "X-Forwarded-Remote-User"
 )
 
-# If the organization setting auth_password_login_enabled is not false, then users will still be
-# able to login through Redash instead of the LDAP server
-LDAP_LOGIN_ENABLED = parse_boolean(os.environ.get("REDASH_LDAP_LOGIN_ENABLED", "false"))
-# Bind LDAP using SSL. Default is False
-LDAP_SSL = parse_boolean(os.environ.get("REDASH_LDAP_USE_SSL", "false"))
-# Choose authentication method(SIMPLE, ANONYMOUS or NTLM). Default is SIMPLE
-LDAP_AUTH_METHOD = os.environ.get("REDASH_LDAP_AUTH_METHOD", "SIMPLE")
-# The LDAP directory address (ex. ldap://10.0.10.1:389)
-LDAP_HOST_URL = os.environ.get("REDASH_LDAP_URL", None)
-# The DN & password used to connect to LDAP to determine the identity of the user being authenticated.
-# For AD this should be "org\\user".
-LDAP_BIND_DN = os.environ.get("REDASH_LDAP_BIND_DN", None)
-LDAP_BIND_DN_PASSWORD = os.environ.get("REDASH_LDAP_BIND_DN_PASSWORD", "")
-# AD/LDAP email and display name keys
-LDAP_DISPLAY_NAME_KEY = os.environ.get("REDASH_LDAP_DISPLAY_NAME_KEY", "displayName")
-LDAP_EMAIL_KEY = os.environ.get("REDASH_LDAP_EMAIL_KEY", "mail")
-# Prompt that should be shown above username/email field.
-LDAP_CUSTOM_USERNAME_PROMPT = os.environ.get(
-    "REDASH_LDAP_CUSTOM_USERNAME_PROMPT", "LDAP/AD/SSO username:"
-)
-# LDAP Search DN TEMPLATE (for AD this should be "(sAMAccountName=%(username)s)"")
-LDAP_SEARCH_TEMPLATE = os.environ.get(
-    "REDASH_LDAP_SEARCH_TEMPLATE", "(cn=%(username)s)"
-)
-# The schema to bind to (ex. cn=users,dc=ORG,dc=local)
-LDAP_SEARCH_DN = os.environ.get(
-    "REDASH_LDAP_SEARCH_DN", os.environ.get("REDASH_SEARCH_DN")
-)
-
 STATIC_ASSETS_PATH = fix_assets_path(
     os.environ.get("REDASH_STATIC_ASSETS_PATH", "../client/dist/")
 )
@@ -346,26 +317,14 @@ dynamic_settings = importlib.import_module(
     os.environ.get("REDASH_DYNAMIC_SETTINGS_MODULE", "redash.settings.dynamic_settings")
 )
 
-# Destinations
-default_destinations = [
+# Destinations (hardcoded for this fork: email + Slack + webhook only).
+# REDASH_ENABLED_DESTINATIONS and related env vars are intentionally ignored so
+# deployment config cannot re-enable removed destinations.
+DESTINATIONS = [
     "redash.destinations.email",
     "redash.destinations.slack",
     "redash.destinations.webhook",
-    "redash.destinations.hipchat",
-    "redash.destinations.mattermost",
-    "redash.destinations.chatwork",
-    "redash.destinations.pagerduty",
-    "redash.destinations.hangoutschat",
 ]
-
-enabled_destinations = array_from_string(
-    os.environ.get("REDASH_ENABLED_DESTINATIONS", ",".join(default_destinations))
-)
-additional_destinations = array_from_string(
-    os.environ.get("REDASH_ADDITIONAL_DESTINATIONS", "")
-)
-
-DESTINATIONS = distinct(enabled_destinations + additional_destinations)
 
 EVENT_REPORTING_WEBHOOKS = array_from_string(
     os.environ.get("REDASH_EVENT_REPORTING_WEBHOOKS", "")

@@ -240,7 +240,7 @@ def logout_and_redirect_to_index():
 
 
 def init_app(app):
-    from redash.authentication import ldap_auth, remote_user_auth, saml_auth
+    from redash.authentication import remote_user_auth, saml_auth
     from redash.authentication.google_oauth import (
         create_google_oauth_blueprint,
     )
@@ -261,7 +261,6 @@ def init_app(app):
         create_google_oauth_blueprint(app),
         saml_auth.blueprint,
         remote_user_auth.blueprint,
-        ldap_auth.blueprint,
     ]:
         csrf.exempt(blueprint)
         app.register_blueprint(blueprint)

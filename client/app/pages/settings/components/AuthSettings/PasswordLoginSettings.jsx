@@ -12,7 +12,7 @@ export default function PasswordLoginSettings(props) {
   const { settings, values, onChange, loading } = props;
 
   const isTheOnlyAuthMethod =
-    !clientConfig.googleLoginEnabled && !clientConfig.ldapLoginEnabled && !values.auth_saml_enabled;
+    !clientConfig.googleLoginEnabled && !values.auth_saml_enabled;
 
   return (
     <DynamicComponent name="OrganizationSettings.PasswordLoginSettings" {...props}>

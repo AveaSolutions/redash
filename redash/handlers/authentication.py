@@ -101,7 +101,6 @@ def render_token_login_page(template, org_slug, token, invite):
             google_auth_url=google_auth_url,
             show_saml_login=current_org.get_setting("auth_saml_enabled"),
             show_remote_user_login=settings.REMOTE_USER_LOGIN_ENABLED,
-            show_ldap_login=settings.LDAP_LOGIN_ENABLED,
             org_slug=org_slug,
             user=user,
         ),
@@ -233,7 +232,6 @@ def login(org_slug=None):
         show_password_login=current_org.get_setting("auth_password_login_enabled"),
         show_saml_login=current_org.get_setting("auth_saml_enabled"),
         show_remote_user_login=settings.REMOTE_USER_LOGIN_ENABLED,
-        show_ldap_login=settings.LDAP_LOGIN_ENABLED,
     )
 
 
@@ -303,7 +301,6 @@ def client_config():
         "dashboardRefreshIntervals": settings.DASHBOARD_REFRESH_INTERVALS,
         "queryRefreshIntervals": settings.QUERY_REFRESH_INTERVALS,
         "googleLoginEnabled": settings.GOOGLE_OAUTH_ENABLED,
-        "ldapLoginEnabled": settings.LDAP_LOGIN_ENABLED,
         "pageSize": settings.PAGE_SIZE,
         "pageSizeOptions": settings.PAGE_SIZE_OPTIONS,
         "tableCellMaxJSONSize": settings.TABLE_CELL_MAX_JSON_SIZE,
