@@ -2,7 +2,7 @@ module.exports = {
   root: true,
   parser: "@typescript-eslint/parser",
   extends: [
-    "react-app",
+    "./eslint-config-redash-base",
     "plugin:compat/recommended",
     "prettier",
     "plugin:jsx-a11y/recommended",
