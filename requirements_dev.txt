@@ -3,6 +3,6 @@ freezegun==1.2.1
 mock==5.0.2
 ptpython==3.0.23
 ptvsd==4.3.2
-pytest==7.4.0
+pytest==9.0.3
 pytest-cov==4.1.0
 watchdog==3.0.0
