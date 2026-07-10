@@ -70,7 +70,7 @@ exports[`ScheduleDialog Sets correct schedule settings Sets to "1 Day 22:15" Set
             empty={false}
             getTriggerDOMNode={[Function]}
             popupElement={
-              <ForwardRef(OptionList)
+              <OptionList
                 childrenAsData={true}
                 defaultActiveFirstOption={true}
                 flattenOptions={
@@ -474,7 +474,7 @@ exports[`ScheduleDialog Sets correct schedule settings Sets to "1 Day 22:15" Set
               onPopupVisibleChange={[Function]}
               popup={
                 <div>
-                  <ForwardRef(OptionList)
+                  <OptionList
                     childrenAsData={true}
                     defaultActiveFirstOption={true}
                     flattenOptions={
@@ -2015,7 +2015,7 @@ exports[`ScheduleDialog Sets correct schedule settings Sets to "2 Hours" 1`] = `
             empty={false}
             getTriggerDOMNode={[Function]}
             popupElement={
-              <ForwardRef(OptionList)
+              <OptionList
                 childrenAsData={true}
                 defaultActiveFirstOption={true}
                 flattenOptions={
@@ -2419,7 +2419,7 @@ exports[`ScheduleDialog Sets correct schedule settings Sets to "2 Hours" 1`] = `
               onPopupVisibleChange={[Function]}
               popup={
                 <div>
-                  <ForwardRef(OptionList)
+                  <OptionList
                     childrenAsData={true}
                     defaultActiveFirstOption={true}
                     flattenOptions={
@@ -3164,7 +3164,7 @@ exports[`ScheduleDialog Sets correct schedule settings Sets to "2 Weeks 22:15 Tu
             empty={false}
             getTriggerDOMNode={[Function]}
             popupElement={
-              <ForwardRef(OptionList)
+              <OptionList
                 childrenAsData={true}
                 defaultActiveFirstOption={true}
                 flattenOptions={
@@ -3568,7 +3568,7 @@ exports[`ScheduleDialog Sets correct schedule settings Sets to "2 Weeks 22:15 Tu
               onPopupVisibleChange={[Function]}
               popup={
                 <div>
-                  <ForwardRef(OptionList)
+                  <OptionList
                     childrenAsData={true}
                     defaultActiveFirstOption={true}
                     flattenOptions={
@@ -5483,7 +5483,7 @@ exports[`ScheduleDialog Sets correct schedule settings Sets to "5 Minutes" 1`] =
             empty={false}
             getTriggerDOMNode={[Function]}
             popupElement={
-              <ForwardRef(OptionList)
+              <OptionList
                 childrenAsData={true}
                 defaultActiveFirstOption={true}
                 flattenOptions={
@@ -5887,7 +5887,7 @@ exports[`ScheduleDialog Sets correct schedule settings Sets to "5 Minutes" 1`] =
               onPopupVisibleChange={[Function]}
               popup={
                 <div>
-                  <ForwardRef(OptionList)
+                  <OptionList
                     childrenAsData={true}
                     defaultActiveFirstOption={true}
                     flattenOptions={
@@ -6629,7 +6629,7 @@ exports[`ScheduleDialog Sets correct schedule settings Sets to "Never" 1`] = `
             empty={false}
             getTriggerDOMNode={[Function]}
             popupElement={
-              <ForwardRef(OptionList)
+              <OptionList
                 childrenAsData={true}
                 defaultActiveFirstOption={true}
                 flattenOptions={
@@ -7029,7 +7029,7 @@ exports[`ScheduleDialog Sets correct schedule settings Sets to "Never" 1`] = `
               onPopupVisibleChange={[Function]}
               popup={
                 <div>
-                  <ForwardRef(OptionList)
+                  <OptionList
                     childrenAsData={true}
                     defaultActiveFirstOption={true}
                     flattenOptions={

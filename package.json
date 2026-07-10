@@ -83,6 +83,7 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.10.4",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
+    "@types/babel__traverse": "^7.14.2",
     "@types/classnames": "^2.2.10",
     "@types/hoist-non-react-statics": "^3.3.1",
     "@types/lodash": "^4.14.157",
@@ -94,7 +95,7 @@
     "@typescript-eslint/parser": "^2.10.0",
     "ajv": "^8.12.0",
     "babel-eslint": "^10.0.3",
-    "babel-jest": "^24.1.0",
+    "babel-jest": "^28.1.3",
     "babel-loader": "^8.4.1",
     "babel-plugin-istanbul": "^6.0.0",
     "babel-plugin-transform-builtin-extend": "^1.1.2",
@@ -115,7 +116,8 @@
     "eslint-plugin-react-hooks": "^1.7.0",
     "html-webpack-plugin": "^5.6.3",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^24.1.0",
+    "jest": "^28.1.3",
+    "jest-environment-jsdom": "^28.1.3",
     "less": "^3.9.0",
     "less-loader": "^10.2.0",
     "less-plugin-autoprefix": "^2.0.0",
@@ -137,6 +139,7 @@
   },
   "jest": {
     "rootDir": "./client",
+    "testEnvironment": "jsdom",
     "setupFiles": [
       "./app/__tests__/enzyme_setup.js",
       "./app/__tests__/mocks.js"
