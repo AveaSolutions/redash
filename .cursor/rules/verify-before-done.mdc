@@ -1,0 +1,37 @@
+---
+description: Require build and test verification before marking work complete
+alwaysApply: true
+---
+
+# Verify Before Done
+
+Do not tell the user work is complete until verification passes for the areas touched by the change.
+
+## Required checks
+
+Run applicable commands and fix failures before finishing:
+
+| Area changed | Command |
+|--------------|---------|
+| Frontend (`client/`, root `package.json`) | `npm run lint` |
+| Frontend logic/components | `npm test` (root + `cd viz-lib && npm test` if viz-lib changed) |
+| Production bundle | `npm run build` when webpack/config/deps changed |
+| Backend (`redash/`, `requirements*.txt`) | `make backend-unit-tests` or `docker compose run --rm server tests` |
+| Broad or uncertain scope | `make test` (lint + backend + frontend) |
+
+## Workflow
+
+1. Make the change.
+2. Run the checks above that match the diff.
+3. If a check fails, fix and re-run until green.
+4. Only then report completion; mention which commands passed.
+
+## Exceptions
+
+- Pure documentation under `security-audit-2026/` with no code changes — no test run required.
+- User explicitly says to skip verification for a draft or exploratory change.
+- Environment blockers (Docker down, missing deps): say what failed to run and what still needs verification locally.
+
+## Commit / ticket hygiene
+
+When closing a slice of work, note verification in the commit message or Jira comment, e.g. `lint + jest + backend tests pass`.
