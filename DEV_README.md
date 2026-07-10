@@ -191,9 +191,6 @@ npm run watch
 # Shell inside the server container
 docker compose run --rm server bash
 
-# Flask manage.py shell
-docker compose run --rm server manage shell
-
 # Redis CLI
 docker compose run --rm redis redis-cli -h redis
 ```

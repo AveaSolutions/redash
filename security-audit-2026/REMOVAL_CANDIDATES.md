@@ -15,9 +15,10 @@ This document lists code, config, and dependencies that may be safe to **delete 
 |---|---|---|---|
 | Cypress + Percy e2e stack | AO-19386 | **Done** | `4d4560e5` |
 | Tier 1 — config / dead code | AO-19388 | **Done** | `f50a5dae` |
-| Tier 4 — alert destinations (Slack/email/webhook only) | AO-19388 | **Done** | *(this commit)* |
-| Tier 4 — LDAP auth removal | AO-19388 | **Done** | *(this commit)* |
-| Tier 2 — dev deps / tooling | AO-19388 | Open | — |
+| Tier 4 — alert destinations (Slack/email/webhook only) | AO-19388 | **Done** | `abc34398` |
+| Tier 4 — LDAP auth removal | AO-19388 | **Done** | `abc34398` |
+| Tier 2 — `ptpython` / `manage shell` | AO-19388 | **Done** | *(this commit)* |
+| Tier 2 — other dev deps / tooling | AO-19388 | Open | — |
 | Tier 3 — CircleCI / Restyled | AO-19388 | Needs team confirm | — |
 
 ---
@@ -30,6 +31,7 @@ This document lists code, config, and dependencies that may be safe to **delete 
 | **Tier 1 batch** | AO-19388 | `netlify.toml`, `requirements_oracle_ds.txt`, dead `nyc` config, Percy CSS hooks, `build:old-node-version`, `.github/weekly-digest.yml` |
 | **Alert destinations** (HipChat, ChatWork, Mattermost, Hangouts Chat, PagerDuty) | AO-19388 | Modules deleted; `DESTINATIONS` hardcoded to email + Slack + webhook (env vars ignored, same pattern as `QUERY_RUNNERS`); `pypd` dropped from `requirements.txt` |
 | **LDAP auth** | AO-19388 | `ldap_auth.py`, settings, templates, UI toggles, and `ldap3` install comment removed |
+| **`ptpython` / `manage shell`** | AO-19388 | Removed `manage shell` CLI command, `shell_context_processor`, and `ptpython` from `requirements_dev.txt`; Flask default shell disabled via `add_default_commands=False` |
 | 7 stale Dependabot PRs | — | cryptography, jinja2, plotly.js, axios, werkzeug, es5-ext ×2 — superseded by security remediation |
 | 3 conflicting Dependabot PRs | — | @babel/traverse, webpack-dev-server, express — closed; tracked in Phase 4 |
 
@@ -89,30 +91,6 @@ Larger config surfaces. Same *spirit* as Cypress removal, but needs confirmation
 | ~~**Alert destinations**~~ | `redash/destinations/`, `redash/settings/__init__.py` | **Removed** | Prod confirmed: Slack / email / webhook only. HipChat, ChatWork, Mattermost, Hangouts Chat, PagerDuty modules deleted. |
 | ~~**`pypd`**~~ | `requirements.txt` | **Removed** | Was only used by PagerDuty destination. |
 | ~~**LDAP auth**~~ | `redash/authentication/ldap_auth.py`, settings, UI | **Removed** | Never used in Avea environments; previously hard-disabled for GHSA-32fw-wc7f-7qg9. |
-| **`ptpython`** | `requirements_dev.txt`, `redash/cli/__init__.py` | **Keep for now** — see below | Dev-only REPL for `manage shell`. |
-
-### `ptpython` / `manage shell` — what it is
-
-`manage shell` is a Flask CLI command registered in `redash/cli/__init__.py`. It starts an **interactive Python REPL** (via [ptpython](https://github.com/prompt-toolkit/ptpython)) inside a live Flask application context.
-
-**How to use it** (from `DEV_README.md`):
-
-```bash
-docker compose run --rm server manage shell
-```
-
-**What you get:**
-
-- Full access to Redash ORM models (`User`, `Query`, `Dashboard`, etc.) and `settings` via `app.make_shell_context()`
-- ptpython niceties: syntax highlighting, autocomplete, multiline editing — nicer than the stdlib `code` module
-- Useful for ad-hoc debugging: inspect DB rows, test query logic, poke at settings without writing a one-off script
-
-**Why it's dev-only:**
-
-- Listed in `requirements_dev.txt` — not installed in production Docker images (`skip_dev_deps` build arg)
-- Zero production/runtime impact; only affects local or dev-container workflows
-
-**Removal impact:** Deleting `ptpython` would break `manage shell` unless replaced with stdlib `code.interact()` or IPython. Low priority unless nobody on the team uses the REPL.
 
 ---
 
@@ -151,9 +129,10 @@ These look old or noisy but are still required.
 ## Suggested execution order
 
 1. ~~**Tier 1 batch**~~ — done (`f50a5dae`)
-2. ~~**Tier 4 — destinations + LDAP**~~ — done *(this commit)*
-3. **Tier 2 batch** — `ptvsd`, `webpack-build-notifier`, `ts-migrate`, `eslint-plugin-flowtype`; drop `webpack-bundle-analyzer` if `npm run analyze` is unused
-4. **Confirm Tier 3** with team — delete `.circleci/` and/or `.restyled.yaml` if unused
+2. ~~**Tier 4 — destinations + LDAP**~~ — done (`abc34398`)
+3. ~~**Tier 2 — `ptpython` / `manage shell`**~~ — done *(this commit)*
+4. **Tier 2 batch (remaining)** — `ptvsd`, `webpack-build-notifier`, `ts-migrate`, `eslint-plugin-flowtype`; drop `webpack-bundle-analyzer` if `npm run analyze` is unused
+5. **Confirm Tier 3** with team — delete `.circleci/` and/or `.restyled.yaml` if unused
 
 ---
 
