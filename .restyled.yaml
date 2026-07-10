@@ -60,4 +60,3 @@ restylers:
     include:
       - client/app/**/*.js
       - client/app/**/*.jsx
-      - client/cypress/**/*.js

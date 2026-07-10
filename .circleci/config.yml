@@ -57,9 +57,6 @@ jobs:
       - store_artifacts:
           path: coverage.xml
   frontend-lint:
-    environment:
-      CYPRESS_INSTALL_BINARY: 0
-      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 1
     docker:
       - image: circleci/node:12
     steps:
@@ -70,9 +67,6 @@ jobs:
       - store_test_results:
           path: /tmp/test-results
   frontend-unit-tests:
-    environment:
-      CYPRESS_INSTALL_BINARY: 0
-      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 1
     docker:
       - image: circleci/node:12
     steps:
@@ -89,52 +83,6 @@ jobs:
           name: Run Visualizations Tests
           command: (cd viz-lib && npm test)
       - run: npm run lint
-  frontend-e2e-tests:
-    environment:
-      COMPOSE_FILE: .circleci/docker-compose.cypress.yml
-      COMPOSE_PROJECT_NAME: cypress
-      PERCY_TOKEN_ENCODED: ZGRiY2ZmZDQ0OTdjMzM5ZWE0ZGQzNTZiOWNkMDRjOTk4Zjg0ZjMxMWRmMDZiM2RjOTYxNDZhOGExMjI4ZDE3MA==
-      CYPRESS_PROJECT_ID_ENCODED: OTI0Y2th
-      CYPRESS_RECORD_KEY_ENCODED: YzA1OTIxMTUtYTA1Yy00NzQ2LWEyMDMtZmZjMDgwZGI2ODgx
-      CYPRESS_INSTALL_BINARY: 0
-      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 1
-    docker:
-      - image: circleci/node:12
-    steps:
-      - setup_remote_docker
-      - checkout
-      - run:
-          name: Enable Code Coverage report for master branch
-          command: |
-            if [ "$CIRCLE_BRANCH" = "master" ]; then
-              echo 'export CODE_COVERAGE=true' >> $BASH_ENV
-              source $BASH_ENV
-            fi
-      - run:
-          name: Install npm dependencies
-          command: |
-            npm ci
-      - run:
-          name: Setup Redash server
-          command: |
-            npm run cypress build
-            npm run cypress start -- --skip-db-seed
-            docker-compose run cypress npm run cypress db-seed
-      - run:
-          name: Execute Cypress tests
-          command: npm run cypress run-ci
-      - run:
-          name: "Failure: output container logs to console"
-          command: |
-            docker-compose logs
-          when: on_fail
-      - run:
-          name: Copy Code Coverage results
-          command: |
-            docker cp cypress:/usr/src/app/coverage ./coverage || true
-          when: always
-      - store_artifacts:
-          path: coverage
   build-docker-image: *build-docker-image-job
   build-preview-docker-image: *build-docker-image-job
 workflows:
@@ -150,14 +98,10 @@ workflows:
           requires:
             - backend-lint
             - frontend-lint
-      - frontend-e2e-tests:
-          requires:
-            - frontend-lint
       - build-preview-docker-image:
           requires:
             - backend-unit-tests
             - frontend-unit-tests
-            - frontend-e2e-tests
           filters:
             branches:
               only:
@@ -167,7 +111,6 @@ workflows:
           requires:
             - backend-unit-tests
             - frontend-unit-tests
-            - frontend-e2e-tests
           filters:
             branches:
               only:

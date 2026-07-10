@@ -248,7 +248,7 @@ This fork installs only PostgreSQL and SQL Server data-source drivers by default
 docker compose build --build-arg skip_ds_deps=true
 ```
 
-To bake the frontend into the image **and** still use the dev compose file, you must still run a local frontend build because of the `.:/app` volume mount. For a production-like image build without the bind mount, see `.circleci/docker-compose.cypress.yml`.
+To bake the frontend into the image **and** still use the dev compose file, you must still run a local frontend build because of the `.:/app` volume mount. For a production-like image build without the bind mount, run `npm run build` locally before `docker compose build` (without `skip_frontend_build`).
 
 ---
 
