@@ -1,4 +1,3 @@
-advocate==1.0.0
 aniso8601==8.0.0
 blinker==1.6.2
 # cffi 2.x: cryptography 48.x requires cffi>=2.0. This file is installed last, so it
@@ -41,7 +40,8 @@ python-dotenv==1.2.2
 pytz>=2019.3
 PyYAML==6.0.1
 redis==4.6.0
-requests==2.31.0
+requests==2.32.4
+requests-hardened==1.2.2
 RestrictedPython==8.1
 rq==1.9.0
 rq-scheduler==0.11.0
@@ -61,7 +61,7 @@ statsd==3.3.0
 supervisor==4.1.0
 supervisor_checks==0.8.1
 ua-parser==0.18.0
-urllib3==1.26.20
+urllib3>=2.2.0,<3.0
 user-agents==2.0
 werkzeug==2.3.8
 wtforms==2.2.1

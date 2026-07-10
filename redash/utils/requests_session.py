@@ -1,17 +1,28 @@
+import requests
+from requests_hardened import Config
+from requests_hardened.client import HTTPSession
+from requests_hardened.ip_filter import InvalidIPAddress
+
 from redash import settings
 
-from advocate.exceptions import UnacceptableAddressException
-if settings.ENFORCE_PRIVATE_ADDRESS_BLOCK:
-    import advocate as requests_or_advocate
-else:
-    import requests as requests_or_advocate
+# Backwards-compatible alias used by query runners for SSRF blocks.
+UnacceptableAddressException = InvalidIPAddress
+
+_http_config = Config(
+    ip_filter_enable=settings.ENFORCE_PRIVATE_ADDRESS_BLOCK,
+    ip_filter_allow_loopback_ips=False,
+    never_redirect=not settings.REQUESTS_ALLOW_REDIRECTS,
+    default_timeout=None,
+)
 
 
+class ConfiguredSession(HTTPSession):
+    def __init__(self):
+        super().__init__(_http_config)
 
-class ConfiguredSession(requests_or_advocate.Session):
     def request(self, *args, **kwargs):
         if not settings.REQUESTS_ALLOW_REDIRECTS:
-            kwargs.update({"allow_redirects": False})
+            kwargs.setdefault("allow_redirects", False)
         return super().request(*args, **kwargs)
 
 

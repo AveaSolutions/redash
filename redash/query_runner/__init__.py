@@ -12,7 +12,9 @@ from redash import settings, utils
 from redash.utils import json_loads, query_is_select_no_limit, add_limit_to_query
 from rq.timeouts import JobTimeoutException
 
-from redash.utils.requests_session import requests_or_advocate, requests_session, UnacceptableAddressException
+import requests
+
+from redash.utils.requests_session import requests_session, UnacceptableAddressException
 
 
 logger = logging.getLogger(__name__)
@@ -299,7 +301,7 @@ class BaseHTTPQueryRunner(BaseQueryRunner):
             if response.status_code != 200:
                 error = "{} ({}).".format(self.response_error, response.status_code)
 
-        except requests_or_advocate.HTTPError as exc:
+        except requests.HTTPError as exc:
             logger.exception(exc)
             error = "Failed to execute query. " "Return Code: {} Reason: {}".format(
                 response.status_code, response.text
@@ -307,7 +309,7 @@ class BaseHTTPQueryRunner(BaseQueryRunner):
         except UnacceptableAddressException as exc:
             logger.exception(exc)
             error = "Can't query private addresses."
-        except requests_or_advocate.RequestException as exc:
+        except requests.RequestException as exc:
             # Catch all other requests exceptions and return the error.
             logger.exception(exc)
             error = str(exc)
