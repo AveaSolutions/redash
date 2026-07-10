@@ -63,7 +63,7 @@ supervisor_checks==0.8.1
 ua-parser==0.18.0
 urllib3>=2.2.0,<3.0
 user-agents==2.0
-werkzeug==2.3.8
+werkzeug==3.1.6
 wtforms==2.2.1
 xlsxwriter==1.2.2
 # Install the dependencies of the bin/bundle-extensions script here.
