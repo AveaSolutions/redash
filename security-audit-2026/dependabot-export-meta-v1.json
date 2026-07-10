@@ -1,0 +1,8 @@
+{
+  "exported_at": "2026-07-10T00:25:00Z",
+  "repo": "AveaSolutions/redash",
+  "state": "open",
+  "local_commit": "aba311bc",
+  "alert_count": 302,
+  "note": "Pre-Cypress/Percy removal and pre-pytest 9.0.3 bump. Renamed to -v1 on 2026-07-10."
+}

@@ -2,7 +2,7 @@
 
 Date: 2026-07-09  
 Scope: `AveaSolutions/redash`, post–Round 1 remediation (`aba311bc` merge + `073eff68` follow-up)  
-Data source: GitHub Dependabot API export (`security-audit-2026/dependabot-open.json`, 302 open alerts)
+Data source: GitHub Dependabot API export (`security-audit-2026/dependabot-open-v1.json`, 302 open alerts)
 
 Round 1 covered application CVEs, Python runtime deps, and frontend **production** runtime deps.  
 Round 2 triages the **remaining open Dependabot alerts** and proposes a phased response.
@@ -25,8 +25,8 @@ documented residual risk (build-toolchain transitive deps + deliberately held Py
 
 Exported artifacts (this directory):
 
-- `security-audit-2026/dependabot-open.json` — full raw export
-- `security-audit-2026/dependabot-non-dev.tsv` — 134 non-dev alerts with triage category
+- `security-audit-2026/dependabot-open-v1.json` — full raw export (v1, 302 alerts)
+- `security-audit-2026/dependabot-non-dev-v1.tsv` — 134 non-dev alerts with triage category (v1)
 
 ---
 
