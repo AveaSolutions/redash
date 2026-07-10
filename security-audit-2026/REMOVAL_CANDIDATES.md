@@ -20,7 +20,7 @@ This document lists code, config, and dependencies that may be safe to **delete 
 | Tier 4 — unused SSO auth (Google/SAML/remote-user/JWT) | AO-19389 | **Done** | *(this commit)* |
 | Tier 2 — `ptpython` / `manage shell` | AO-19388 | **Done** | `e6f10291` |
 | Tier 2 — other dev deps / tooling | AO-19388 | Open | — |
-| Tier 3 — CircleCI / Restyled | AO-19388 | Needs team confirm | — |
+| Tier 3 — CircleCI / Restyled | AO-19388 | **Done** | *(this commit)* |
 
 ---
 
@@ -33,6 +33,7 @@ This document lists code, config, and dependencies that may be safe to **delete 
 | **Alert destinations** (HipChat, ChatWork, Mattermost, Hangouts Chat, PagerDuty) | AO-19388 | Modules deleted; `DESTINATIONS` hardcoded to email + Slack + webhook (env vars ignored, same pattern as `QUERY_RUNNERS`); `pypd` dropped from `requirements.txt` |
 | **LDAP auth** | AO-19388 | `ldap_auth.py`, settings, templates, UI toggles, and `ldap3` install comment removed |
 | **`ptpython` / `manage shell`** | AO-19388 | Removed `manage shell` CLI command, `shell_context_processor`, and `ptpython` from `requirements_dev.txt`; Flask default shell disabled via `add_default_commands=False` |
+| **Tier 3 — CircleCI + Restyled** | AO-19388 | `.circleci/` (stale Node 12 / Python 3.7 upstream CI) and `.restyled.yaml` (unused auto-format bot config); Avea CI is Azure DevOps |
 | 7 stale Dependabot PRs | — | cryptography, jinja2, plotly.js, axios, werkzeug, es5-ext ×2 — superseded by security remediation |
 | 3 conflicting Dependabot PRs | — | @babel/traverse, webpack-dev-server, express — closed; tracked in Phase 4 |
 
@@ -74,14 +75,14 @@ Packages or deps wired only for local dev ergonomics. Removing them shrinks the 
 
 ---
 
-## Tier 3 — Infrastructure (confirm with team first)
+## Tier 3 — Infrastructure
 
-Larger config surfaces. Same *spirit* as Cypress removal, but needs confirmation that Avea does not rely on them.
+**Status: complete (AO-19388, *(this commit)*)**
 
 | Candidate | Location | Why remove | Effort | Dependabot impact |
 |---|---|---|---|---|
-| **`.circleci/`** | `.circleci/config.yml` + helpers | Still references `circleci/node:12` and `circleci/python:3.7.0` while app is Python 3.10 / Node 16. Avea CI appears to be Azure DevOps (`Redash-Package` check on PR #90). | 1–2 hrs | None |
-| **`.restyled.yaml`** | repo root | Restyled bot config (auto-format PRs). Remove if not using Restyled on this fork. | ~15 min | None |
+| ~~**`.circleci/`**~~ | `.circleci/config.yml` + helpers | Stale upstream CI (Node 12, Python 3.7). Avea uses Azure DevOps. | 1–2 hrs | None |
+| ~~**`.restyled.yaml`**~~ | repo root | Restyled bot config — not used on this fork. | ~15 min | None |
 
 ---
 
@@ -134,7 +135,7 @@ These look old or noisy but are still required.
 2. ~~**Tier 4 — destinations + LDAP**~~ — done (`abc34398`)
 3. ~~**Tier 2 — `ptpython` / `manage shell`**~~ — done *(this commit)*
 4. **Tier 2 batch (remaining)** — `ptvsd`, `webpack-build-notifier`, `ts-migrate`, `eslint-plugin-flowtype`; drop `webpack-bundle-analyzer` if `npm run analyze` is unused
-5. **Confirm Tier 3** with team — delete `.circleci/` and/or `.restyled.yaml` if unused
+5. ~~**Tier 3 — CircleCI + Restyled**~~ — done *(this commit)*
 
 ---
 
