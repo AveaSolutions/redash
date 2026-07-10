@@ -2,13 +2,10 @@
 
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const WebpackBuildNotifierPlugin = require("webpack-build-notifier");
 const ManifestPlugin = require("webpack-manifest-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const LessPluginAutoPrefix = require("less-plugin-autoprefix");
-const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
-  .BundleAnalyzerPlugin;
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 
 const path = require("path");
@@ -84,7 +81,6 @@ const config = {
     }
   },
   plugins: [
-    new WebpackBuildNotifierPlugin({ title: "Redash" }),
     // bundle only default `moment` locale (`en`)
     new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /en/),
     new HtmlWebpackPlugin({
@@ -284,10 +280,6 @@ const config = {
 
 if (process.env.DEV_SERVER_HOST) {
   config.devServer.host = process.env.DEV_SERVER_HOST;
-}
-
-if (process.env.BUNDLE_ANALYZER) {
-  config.plugins.push(new BundleAnalyzerPlugin());
 }
 
 module.exports = maybeApplyOverrides(config);

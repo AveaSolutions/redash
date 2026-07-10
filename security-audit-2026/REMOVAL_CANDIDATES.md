@@ -19,8 +19,8 @@ This document lists code, config, and dependencies that may be safe to **delete 
 | Tier 4 — LDAP auth removal | AO-19388 | **Done** | `abc34398` |
 | Tier 4 — unused SSO auth (Google/SAML/remote-user/JWT) | AO-19389 | **Done** | *(this commit)* |
 | Tier 2 — `ptpython` / `manage shell` | AO-19388 | **Done** | `e6f10291` |
-| Tier 2 — other dev deps / tooling | AO-19388 | Open | — |
-| Tier 3 — CircleCI / Restyled | AO-19388 | **Done** | *(this commit)* |
+| Tier 2 — dev deps / tooling batch | AO-19388 | **Done** | *(this commit)* |
+| Tier 3 — CircleCI / Restyled | AO-19388 | **Done** | `9285114f` |
 
 ---
 
@@ -34,6 +34,7 @@ This document lists code, config, and dependencies that may be safe to **delete 
 | **LDAP auth** | AO-19388 | `ldap_auth.py`, settings, templates, UI toggles, and `ldap3` install comment removed |
 | **`ptpython` / `manage shell`** | AO-19388 | Removed `manage shell` CLI command, `shell_context_processor`, and `ptpython` from `requirements_dev.txt`; Flask default shell disabled via `add_default_commands=False` |
 | **Tier 3 — CircleCI + Restyled** | AO-19388 | `.circleci/` (stale Node 12 / Python 3.7 upstream CI) and `.restyled.yaml` (unused auto-format bot config); Avea CI is Azure DevOps |
+| **Tier 2 — dev deps batch** | AO-19388 | `ptvsd`, `coverage`, `webpack-build-notifier`, `webpack-bundle-analyzer`, `eslint-plugin-flowtype`, `ts-migrate`; removed `analyze` scripts and Docker `debug` entrypoint |
 | 7 stale Dependabot PRs | — | cryptography, jinja2, plotly.js, axios, werkzeug, es5-ext ×2 — superseded by security remediation |
 | 3 conflicting Dependabot PRs | — | @babel/traverse, webpack-dev-server, express — closed; tracked in Phase 4 |
 
@@ -55,23 +56,18 @@ This document lists code, config, and dependencies that may be safe to **delete 
 
 ---
 
-## Tier 2 — Dev dependencies / tooling (low functional impact)
+## Tier 2 — Dev dependencies / tooling
 
-Packages or deps wired only for local dev ergonomics. Removing them shrinks the lockfile and may shed dev-scope Dependabot alerts.
+**Status: complete (AO-19388, *(this commit)*)**
 
 | Candidate | Location | Why remove | Effort | Dependabot impact |
 |---|---|---|---|---|
-| **`ptvsd`** | `requirements_dev.txt`, `redash/__init__.py` (`REMOTE_DEBUG`) | Deprecated debugger (replaced by `debugpy`). Opt-in only via env var. | ~30 min | Dev pip (minor) |
-| **`webpack-build-notifier`** | `package.json`, `webpack.config.js` | Desktop notifications during webpack watch. Useless in CI, Docker, WSL. | ~30 min | Dev npm (minor) |
-| **`webpack-bundle-analyzer`** | `package.json`, `webpack.config.js` | Only used by `npm run analyze` / `analyze:build`. Pulls in `ejs` (Dependabot headache). Remove if team does not use bundle analysis. | ~30 min | Dev npm (`ejs` chain) |
-| **`ts-migrate`** | `viz-lib/package.json` | One-time codemod tool. Not referenced by any npm script; only left `// @ts-expect-error ts-migrate(...)` comments in source. | ~30 min | Dev npm |
-| **`eslint-plugin-flowtype`** | `package.json` | Installed but unused — no Flow types in codebase, not in `client/.eslintrc.js`. | ~15 min | Dev npm |
-| **`coverage`** | `requirements_dev.txt` | Likely redundant with `pytest-cov` (which already pulls in `coverage`). | ~15 min | Dev pip (minor) |
-
-### Also remove when deleting the above
-
-- `webpack.config.js` — `WebpackBuildNotifierPlugin` / `BundleAnalyzerPlugin` requires and plugin entries
-- `redash/__init__.py` — `REMOTE_DEBUG` / `ptvsd` block (or swap to `debugpy` if remote debugging is still wanted)
+| ~~**`ptvsd`**~~ | `requirements_dev.txt`, `redash/__init__.py`, `bin/docker-entrypoint` | Deprecated debugger; opt-in via `REMOTE_DEBUG` only. | ~30 min | Dev pip (minor) |
+| ~~**`webpack-build-notifier`**~~ | `package.json`, `webpack.config.js` | Desktop notifications during webpack watch. Useless in CI, Docker, WSL. | ~30 min | Dev npm (minor) |
+| ~~**`webpack-bundle-analyzer`**~~ | `package.json`, `webpack.config.js` | Only used by removed `npm run analyze` scripts. Pulled in `ejs` chain. | ~30 min | Dev npm (`ejs` chain) |
+| ~~**`ts-migrate`**~~ | `viz-lib/package.json` | One-time codemod tool; not referenced by any npm script. | ~30 min | Dev npm |
+| ~~**`eslint-plugin-flowtype`**~~ | `package.json` | Installed but unused — no Flow types in codebase. | ~15 min | Dev npm |
+| ~~**`coverage`**~~ | `requirements_dev.txt` | Redundant with `pytest-cov`. | ~15 min | Dev pip (minor) |
 
 ---
 
@@ -133,9 +129,9 @@ These look old or noisy but are still required.
 
 1. ~~**Tier 1 batch**~~ — done (`f50a5dae`)
 2. ~~**Tier 4 — destinations + LDAP**~~ — done (`abc34398`)
-3. ~~**Tier 2 — `ptpython` / `manage shell`**~~ — done *(this commit)*
-4. **Tier 2 batch (remaining)** — `ptvsd`, `webpack-build-notifier`, `ts-migrate`, `eslint-plugin-flowtype`; drop `webpack-bundle-analyzer` if `npm run analyze` is unused
-5. ~~**Tier 3 — CircleCI + Restyled**~~ — done *(this commit)*
+3. ~~**Tier 2 — `ptpython` / `manage shell`**~~ — done (`e6f10291`)
+4. ~~**Tier 2 batch (remaining)**~~ — done *(this commit)*
+5. ~~**Tier 3 — CircleCI + Restyled**~~ — done (`9285114f`)
 
 ---
 
