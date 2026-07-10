@@ -192,7 +192,7 @@ const config = {
                 ],
                 javascriptEnabled: true
               },
-              sourceMap: !isProduction
+              sourceMap: false
             }
           }
         ]
@@ -237,7 +237,11 @@ const config = {
   devServer: {
     devMiddleware: {
       publicPath: staticPath,
-      index: "/static/index.html"
+      index: "/static/index.html",
+      stats: {
+        modules: false,
+        chunkModules: false
+      }
     },
     historyApiFallback: {
       index: "/static/index.html",
@@ -270,10 +274,6 @@ const config = {
       }
     ],
     client: isHotReloadingEnabled ? { overlay: false } : undefined,
-    stats: {
-      modules: false,
-      chunkModules: false
-    },
     hot: isHotReloadingEnabled
   },
   performance: {
