@@ -18,6 +18,12 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
+      {
         test: /\.[jt]sx?$/,
         exclude: /node_modules/,
         use: ["babel-loader"],
@@ -28,15 +34,10 @@ module.exports = {
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-        use: [
-          {
-            loader: "file-loader",
-            options: {
-              outputPath: "images/",
-              name: "[name].[ext]",
-            },
-          },
-        ],
+        type: "asset/resource",
+        generator: {
+          filename: "images/[name][ext]",
+        },
       },
       {
         test: /\.less$/,
@@ -46,8 +47,10 @@ module.exports = {
           {
             loader: "less-loader",
             options: {
-              plugins: [new LessPluginAutoPrefix({ browsers: ["last 3 versions"] })],
-              javascriptEnabled: true,
+              lessOptions: {
+                plugins: [new LessPluginAutoPrefix({ browsers: ["last 3 versions"] })],
+                javascriptEnabled: true,
+              },
             },
           },
         ],
