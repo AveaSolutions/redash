@@ -10,7 +10,7 @@ This guide covers running Redash locally on **Windows** using **Docker Desktop w
 2. **WSL2** with a Linux distro (Ubuntu recommended).
 3. This repo cloned and accessible from WSL.
 4. **`make`** in WSL: `sudo apt install make`
-5. **Node.js 16** in WSL via [nvm](https://github.com/nvm-sh/nvm) (required for frontend builds; matches the `node:16-bullseye` image in `Dockerfile`).
+5. **Node.js 20** in WSL via [nvm](https://github.com/nvm-sh/nvm) (required for frontend builds; matches the `node:20-bullseye` image in `Dockerfile`).
 
 ### Where to keep the repo
 
@@ -28,16 +28,16 @@ cd ~/repos/redash   # or your path, e.g. /mnt/c/Users/JeremyDeal/Desktop/repos/r
 
 ### Node.js setup (WSL only)
 
-Local frontend builds should use **Node 16** (same as the Docker frontend-builder stage) and **npm 6** (see `package.json` / `SECURITY_AUDIT.md`). Node 16 ships with a newer npm, which breaks on the `sql-formatter` git dependency — install npm 6 after switching to Node 16. Do **not** use Windows Node from `/mnt/c/Program Files/nodejs/` — it is the wrong version and breaks WSL builds (UNC path errors, platform mismatches).
+Local frontend builds should use **Node 20** (same as the Docker frontend-builder stage) and **npm 6** (see `package.json` / `SECURITY_AUDIT.md`). Node 20 ships with a newer npm, which breaks on the `sql-formatter` git dependency — install npm 6 after switching to Node 20. Do **not** use Windows Node from `/mnt/c/Program Files/nodejs/` — it is the wrong version and breaks WSL builds (UNC path errors, platform mismatches).
 
-Install nvm, Node 16, and npm 6 once in WSL:
+Install nvm, Node 20, and npm 6 once in WSL:
 
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 # restart your shell, then:
-nvm install 16
-nvm use 16
-nvm alias default 16
+nvm install 20
+nvm use 20
+nvm alias default 20
 npm install -g npm@6
 ```
 
@@ -45,10 +45,10 @@ Before any frontend work, confirm you are on Linux Node:
 
 ```bash
 source ~/.bashrc
-nvm use 16
+nvm use 20
 which npm node
-# Expected: ~/.nvm/versions/node/v16.x.x/bin/npm
-node --version   # v16.x
+# Expected: ~/.nvm/versions/node/v20.x.x/bin/npm
+node --version   # v20.x
 npm --version    # 6.x
 ```
 
@@ -101,10 +101,10 @@ The first build can take several minutes (Python dependencies, ODBC drivers, etc
 
 ### 3. Install frontend dependencies and build
 
-Because the repo is bind-mounted over `/app`, the container serves frontend assets from your **local** `client/dist/` directory, not from whatever was baked into the image. Build the frontend on the host with Node 16:
+Because the repo is bind-mounted over `/app`, the container serves frontend assets from your **local** `client/dist/` directory, not from whatever was baked into the image. Build the frontend on the host with Node 20:
 
 ```bash
-nvm use 16
+nvm use 20
 npm ci --unsafe-perm
 make build
 ```
@@ -135,7 +135,7 @@ Captured emails (invites, alerts, etc.) appear at **http://localhost:1080**.
 
 ## Recommended command cheat sheet
 
-All commands assume you are in the repo root inside WSL with `nvm use 16` active.
+All commands assume you are in the repo root inside WSL with `nvm use 20` active.
 
 ### Start / stop
 
@@ -227,7 +227,7 @@ docker compose run --rm server tests
 
 2. **Backend (Python)** — edit files under `redash/`. The `dev_server`, `dev_worker`, and `dev_scheduler` commands use `watchmedo` to auto-restart on `.py` changes. No container rebuild needed.
 
-3. **Frontend (JS/TS/React)** — edit files under `client/`. In a second WSL terminal with Node 16 active, either:
+3. **Frontend (JS/TS/React)** — edit files under `client/`. In a second WSL terminal with Node 20 active, either:
    - Run `make watch` (rebuild on file changes), or
    - Run `make build` / `npm run build` after each change.
 
@@ -265,14 +265,14 @@ docker compose up -d
 The frontend was not built. Run:
 
 ```bash
-nvm use 16
+nvm use 20
 make build
 docker compose restart server
 ```
 
 ### `sh: npm: not found` inside the server container
 
-Expected. The `server` image is Python-only; Node is used only during the multi-stage Docker build. Run frontend commands on the host with Node 16 (`make build`, `npm run build`, etc.).
+Expected. The `server` image is Python-only; Node is used only during the multi-stage Docker build. Run frontend commands on the host with Node 20 (`make build`, `npm run build`, etc.).
 
 ### `EBADENGINE`, `fsevents` platform errors, or `ENOENT ... C:\Windows\package.json`
 
@@ -280,7 +280,7 @@ You are using **Windows npm** from WSL instead of Linux Node via nvm. Fix:
 
 ```bash
 source ~/.bashrc
-nvm use 16
+nvm use 20
 which npm   # must NOT be /mnt/c/Program Files/nodejs/npm
 rm -rf node_modules viz-lib/node_modules
 npm ci --unsafe-perm
@@ -326,7 +326,7 @@ Removes containers and Postgres data:
 ```bash
 docker compose down -v
 docker compose build
-nvm use 16
+nvm use 20
 npm ci --unsafe-perm
 make build
 docker compose up -d
@@ -340,8 +340,8 @@ docker compose run --rm server create_db
 Run once after cloning (in a WSL terminal):
 
 ```bash
-# 0. Install Node 16 via nvm (see "Node.js setup" above if not done yet)
-nvm use 16
+# 0. Install Node 20 via nvm (see "Node.js setup" above if not done yet)
+nvm use 20
 
 # 1. Create .env (replace secret with: openssl rand -base64 32)
 echo 'REDASH_COOKIE_SECRET=REPLACE_WITH_A_RANDOM_SECRET' > .env
@@ -371,6 +371,6 @@ docker compose up -d
 Optionally, in a second WSL terminal while doing frontend work:
 
 ```bash
-nvm use 16
+nvm use 20
 make watch
 ```
