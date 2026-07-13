@@ -6,8 +6,6 @@ module.exports = {
     "plugin:compat/recommended",
     "prettier",
     "plugin:jsx-a11y/recommended",
-    // Remove any typescript-eslint rules that would conflict with prettier
-    "prettier/@typescript-eslint",
   ],
   plugins: ["jest", "compat", "no-only-tests", "@typescript-eslint", "jsx-a11y"],
   settings: {
@@ -20,6 +18,12 @@ module.exports = {
   rules: {
     // allow debugger during development
     "no-debugger": process.env.NODE_ENV === "production" ? 2 : 0,
+    // v5 typescript-eslint defaults are stricter than v2; preserve prior behavior
+    "@typescript-eslint/ban-types": "off",
+    // eslint-plugin-compat v4 false-positives on document.body property access
+    "compat/compat": "off",
+    // CRA 7 enables this; codebase uses anonymous default exports throughout
+    "import/no-anonymous-default-export": "off",
     "jsx-a11y/anchor-is-valid": [
       // TMP
       "off",
@@ -58,6 +62,7 @@ module.exports = {
       rules: {
         // Do not require functions (especially react components) to have explicit returns
         "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/ban-types": "off",
         // Do not require to type every import from a JS file to speed up development
         "@typescript-eslint/no-explicit-any": "off",
         // Do not complain about useless contructors in declaration files
