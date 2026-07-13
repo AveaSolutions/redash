@@ -59,12 +59,6 @@ export default function MobileNavbar({ getPopupContainer }) {
                 </Menu.Item>
               )}
               {currentUser.hasPermission("super_admin") && <Menu.Divider />}
-              <Menu.Item key="help">
-                {/* eslint-disable-next-line react/jsx-no-target-blank */}
-                <Link href="https://redash.io/help" target="_blank" rel="noopener">
-                  Help
-                </Link>
-              </Menu.Item>
               <Menu.Item key="logout" onClick={() => Auth.logout()}>
                 Log out
               </Menu.Item>

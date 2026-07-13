@@ -28,16 +28,10 @@ ContextHelp.defaultProps = {
 ContextHelp.defaultIcon = <QuestionCircleFilledIcon className="context-help-default-icon" />;
 
 function NumberFormatSpecs() {
-  const { HelpTriggerComponent } = visualizationsSettings;
   return (
-    <HelpTriggerComponent
-      // @ts-expect-error ts-migrate(2322) FIXME: Type '{ children: Element; type: string; title: st... Remove this comment to see the full error message
-      type="NUMBER_FORMAT_SPECS"
-      title="Formatting Numbers"
-      href="https://redash.io/help/user-guide/visualizations/formatting-numbers"
-      className="visualization-editor-context-help">
-      {ContextHelp.defaultIcon}
-    </HelpTriggerComponent>
+    <Popover content="Use d3-format patterns (e.g. 0,0.00) to control number display.">
+      <QuestionCircleFilledIcon className="context-help-default-icon" />
+    </Popover>
   );
 }
 

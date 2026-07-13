@@ -8,12 +8,6 @@ export interface StepItem<K> {
   node: React.ReactNode;
 }
 
-export interface EmptyStateHelpMessageProps {
-  helpTriggerType: string;
-}
-
-export declare const EmptyStateHelpMessage: React.FunctionComponent<EmptyStateHelpMessageProps>;
-
 export interface EmptyStateProps<K = unknown> {
   header?: string;
   icon?: string;

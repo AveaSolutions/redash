@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import { clientConfig, currentUser } from "@/services/auth";
 import Tooltip from "@/components/Tooltip";
 import Alert from "antd/lib/alert";
-import HelpTrigger from "@/components/HelpTrigger";
 import { useUniqueId } from "@/lib/hooks/useUniqueId";
 
 export default function EmailSettingsWarning({ featureName, className, mode, adminOnly }) {
@@ -19,8 +18,7 @@ export default function EmailSettingsWarning({ featureName, className, mode, adm
 
   const message = (
     <span id={messageDescriptionId}>
-      Your mail server isn&apos;t configured correctly, and is needed for {featureName} to work.{" "}
-      <HelpTrigger type="MAIL_CONFIG" className="f-inherit" />
+      Your mail server isn&apos;t configured correctly, and is needed for {featureName} to work.
     </span>
   );
 
