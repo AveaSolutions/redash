@@ -43,6 +43,17 @@ SQLALCHEMY_ENABLE_POOL_PRE_PING = parse_boolean(
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_ECHO = False
 
+# Flask-SQLAlchemy 3 reads engine options from config instead of apply_driver_hacks.
+from redash.utils import json_dumps  # noqa: E402
+
+SQLALCHEMY_ENGINE_OPTIONS = {"json_serializer": json_dumps}
+if SQLALCHEMY_ENABLE_POOL_PRE_PING:
+    SQLALCHEMY_ENGINE_OPTIONS["pool_pre_ping"] = True
+if SQLALCHEMY_DISABLE_POOL:
+    from sqlalchemy.pool import NullPool  # noqa: E402
+
+    SQLALCHEMY_ENGINE_OPTIONS["poolclass"] = NullPool
+
 RQ_REDIS_URL = os.environ.get("RQ_REDIS_URL", _REDIS_URL)
 
 # The following enables periodic job (every 5 minutes) of removing unused query results.

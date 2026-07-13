@@ -1514,3 +1514,11 @@ def init_db():
     # XXX remove after fixing User.group_ids
     db.session.commit()
     return default_org, admin_group, default_group
+
+
+# Configure mappers after all models are defined (required for SQLAlchemy 1.4+).
+from sqlalchemy.orm import configure_mappers  # noqa: E402
+from sqlalchemy_searchable import make_searchable  # noqa: E402
+
+make_searchable(options={"regconfig": "pg_catalog.simple"})
+configure_mappers()
