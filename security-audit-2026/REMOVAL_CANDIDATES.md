@@ -113,7 +113,7 @@ These look old or noisy but are still required.
 |---|---|
 | **Enzyme + Jest 24** | 180 unit tests depend on them. Removal = migrate to Testing Library (separate project). |
 | **`babel-plugin-istanbul`** | Required by Jest test env in `client/.babelrc`. |
-| **`babel-plugin-transform-builtin-extend`** | Active in `client/.babelrc` for `Error` subclassing. |
+| **`babel-plugin-transform-builtin-extend`** | Removed AO-19411 — Babel 7 compiles native `extends Error` without it. |
 | **`raw-loader`** | Used in `webpack.config.js` for HTML template loading. |
 | **`markdown`**, **`bootstrap`** | Shipped in production bundles — triaged under AO-19387, not deletion. |
 | **`eslint-plugin-compat`** | Active in `client/.eslintrc.js`. |
