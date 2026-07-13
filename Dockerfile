@@ -1,4 +1,4 @@
-FROM node:16-bullseye AS frontend-builder
+FROM node:20-bullseye AS frontend-builder
 
 # Controls whether to build the frontend assets
 ARG skip_frontend_build
