@@ -1,31 +1,51 @@
 import React from "react";
-import enzyme from "enzyme";
+import { fireEvent, screen } from "@testing-library/react";
 
+import {
+  clickDataTest,
+  queryByDataTest,
+  renderOptionsEditor,
+} from "@/testing/rtlUtils";
 import getOptions from "../getOptions";
 import XAxisSettings from "./XAxisSettings";
 
-function findByTestID(wrapper: any, testId: any) {
-  return wrapper.find(`[data-test="${testId}"]`);
+function openSelect(container: HTMLElement, testId: string): void {
+  const wrapper = queryByDataTest(container, testId);
+  const combobox = wrapper?.querySelector('[role="combobox"]');
+  if (!combobox) {
+    throw new Error(`Missing combobox under [data-test="${testId}"]`);
+  }
+  fireEvent.mouseDown(combobox);
 }
 
-function mount(options: any, done: any) {
+function changeValue(container: HTMLElement, testId: string, value: string): void {
+  const el = queryByDataTest(container, testId);
+  if (!el) {
+    throw new Error(`Missing [data-test="${testId}"]`);
+  }
+  const input =
+    el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el : el.querySelector("input, textarea");
+  if (!input) {
+    throw new Error(`Missing input under [data-test="${testId}"]`);
+  }
+  fireEvent.change(input, { target: { value } });
+}
+
+function clickSelectOption(testId: string): void {
+  fireEvent.click(screen.getByTestId(testId));
+}
+
+function renderEditor(options: any, done: () => void) {
   options = getOptions(options);
-  return enzyme.mount(
-    <XAxisSettings
-      visualizationName="Test"
-      data={{ columns: [], rows: [] }}
-      options={options}
-      onOptionsChange={changedOptions => {
-        expect(changedOptions).toMatchSnapshot();
-        done();
-      }}
-    />
+  return renderOptionsEditor(
+    <XAxisSettings visualizationName="Test" data={{ columns: [], rows: [] }} options={options} />,
+    done
   );
 }
 
 describe("Visualizations -> Chart -> Editor -> X-Axis Settings", () => {
   test("Changes axis type", done => {
-    const el = mount(
+    const { container } = renderEditor(
       {
         globalSeriesType: "column",
         xAxis: { type: "-", labels: { enabled: true } },
@@ -33,16 +53,12 @@ describe("Visualizations -> Chart -> Editor -> X-Axis Settings", () => {
       done
     );
 
-    findByTestID(el, "Chart.XAxis.Type")
-      .last()
-      .simulate("mouseDown");
-    findByTestID(el, "Chart.XAxis.Type.Linear")
-      .last()
-      .simulate("click");
+    openSelect(container, "Chart.XAxis.Type");
+    clickSelectOption("Chart.XAxis.Type.Linear");
   });
 
   test("Changes axis name", done => {
-    const el = mount(
+    const { container } = renderEditor(
       {
         globalSeriesType: "column",
         xAxis: { type: "-", labels: { enabled: true } },
@@ -50,13 +66,11 @@ describe("Visualizations -> Chart -> Editor -> X-Axis Settings", () => {
       done
     );
 
-    findByTestID(el, "Chart.XAxis.Name")
-      .last()
-      .simulate("change", { target: { value: "test" } });
+    changeValue(container, "Chart.XAxis.Name", "test");
   });
 
   test("Sets Show Labels option", done => {
-    const el = mount(
+    const { container } = renderEditor(
       {
         globalSeriesType: "column",
         xAxis: { type: "-", labels: { enabled: false } },
@@ -64,13 +78,11 @@ describe("Visualizations -> Chart -> Editor -> X-Axis Settings", () => {
       done
     );
 
-    findByTestID(el, "Chart.XAxis.ShowLabels")
-      .last()
-      .simulate("click");
+    clickDataTest(container, "Chart.XAxis.ShowLabels");
   });
 
   test("Sets Sort X Values option", done => {
-    const el = mount(
+    const { container } = renderEditor(
       {
         globalSeriesType: "column",
         sortX: false,
@@ -78,13 +90,11 @@ describe("Visualizations -> Chart -> Editor -> X-Axis Settings", () => {
       done
     );
 
-    findByTestID(el, "Chart.XAxis.Sort")
-      .last()
-      .simulate("click");
+    clickDataTest(container, "Chart.XAxis.Sort");
   });
 
   test("Sets Reverse X Values option", done => {
-    const el = mount(
+    const { container } = renderEditor(
       {
         globalSeriesType: "column",
         reverseX: false,
@@ -92,8 +102,6 @@ describe("Visualizations -> Chart -> Editor -> X-Axis Settings", () => {
       done
     );
 
-    findByTestID(el, "Chart.XAxis.Reverse")
-      .last()
-      .simulate("click");
+    clickDataTest(container, "Chart.XAxis.Reverse");
   });
 });

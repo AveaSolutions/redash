@@ -1,87 +1,96 @@
 import React from "react";
-import enzyme from "enzyme";
+import { fireEvent, screen } from "@testing-library/react";
 
+import {
+  clickDataTest,
+  queryByDataTest,
+  renderOptionsEditor,
+} from "@/testing/rtlUtils";
 import getOptions from "../getOptions";
 import ColumnsSettings from "./ColumnsSettings";
 
-function findByTestID(wrapper: any, testId: any) {
-  return wrapper.find(`[data-test="${testId}"]`);
+function openSelect(container: HTMLElement, testId: string): void {
+  const wrapper = queryByDataTest(container, testId);
+  const combobox = wrapper?.querySelector('[role="combobox"]');
+  if (!combobox) {
+    throw new Error(`Missing combobox under [data-test="${testId}"]`);
+  }
+  fireEvent.mouseDown(combobox);
 }
 
-function mount(options: any, done: any) {
+function changeValue(container: HTMLElement, testId: string, value: string): void {
+  const el = queryByDataTest(container, testId);
+  if (!el) {
+    throw new Error(`Missing [data-test="${testId}"]`);
+  }
+  const input =
+    el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el : el.querySelector("input, textarea");
+  if (!input) {
+    throw new Error(`Missing input under [data-test="${testId}"]`);
+  }
+  fireEvent.change(input, { target: { value } });
+}
+
+function clickSelectOption(testId: string): void {
+  fireEvent.click(screen.getByTestId(testId));
+}
+
+function setInputChecked(testId: string, checked: boolean): void {
+  const el = screen.getByTestId(testId);
+  const input = el instanceof HTMLInputElement ? el : el.querySelector("input");
+  if (!input) {
+    throw new Error(`Missing input for [data-test="${testId}"]`);
+  }
+  if ((input as HTMLInputElement).checked !== checked) {
+    fireEvent.click(input);
+  }
+}
+
+function renderEditor(options: any, done: () => void) {
   const data = {
     columns: [{ name: "a", type: "string" }],
     rows: [{ a: "test" }],
   };
   options = getOptions(options, data);
-  return enzyme.mount(
-    <ColumnsSettings
-      visualizationName="Test"
-      data={data}
-      options={options}
-      onOptionsChange={changedOptions => {
-        expect(changedOptions).toMatchSnapshot();
-        done();
-      }}
-    />
+  return renderOptionsEditor(
+    <ColumnsSettings visualizationName="Test" data={data} options={options} />,
+    done
   );
 }
 
 describe("Visualizations -> Table -> Editor -> Columns Settings", () => {
   test("Toggles column visibility", done => {
-    const el = mount({}, done);
+    const { container } = renderEditor({}, done);
 
-    findByTestID(el, "Table.Column.a.Visibility")
-      .last()
-      .simulate("click");
+    clickDataTest(container, "Table.Column.a.Visibility");
   });
 
   test("Changes column title", done => {
-    const el = mount({}, done);
-    findByTestID(el, "Table.Column.a.Name")
-      .last()
-      .simulate("click"); // expand settings
+    const { container } = renderEditor({}, done);
+    clickDataTest(container, "Table.Column.a.Name"); // expand settings
 
-    findByTestID(el, "Table.Column.a.Title")
-      .last()
-      .simulate("change", { target: { value: "test" } });
+    changeValue(container, "Table.Column.a.Title", "test");
   });
 
   test("Changes column alignment", done => {
-    const el = mount({}, done);
-    findByTestID(el, "Table.Column.a.Name")
-      .last()
-      .simulate("click"); // expand settings
+    const { container } = renderEditor({}, done);
+    clickDataTest(container, "Table.Column.a.Name"); // expand settings
 
-    findByTestID(el, "Table.Column.a.TextAlignment")
-      .last()
-      .find('[data-test="TextAlignmentSelect.Right"] input')
-      .simulate("change", { target: { checked: true } });
+    setInputChecked("TextAlignmentSelect.Right", true);
   });
 
   test("Enables search by column data", done => {
-    const el = mount({}, done);
-    findByTestID(el, "Table.Column.a.Name")
-      .last()
-      .simulate("click"); // expand settings
+    const { container } = renderEditor({}, done);
+    clickDataTest(container, "Table.Column.a.Name"); // expand settings
 
-    findByTestID(el, "Table.Column.a.UseForSearch")
-      .last()
-      .find("input")
-      .simulate("change", { target: { checked: true } });
+    setInputChecked("Table.Column.a.UseForSearch", true);
   });
 
   test("Changes column display type", done => {
-    const el = mount({}, done);
-    findByTestID(el, "Table.Column.a.Name")
-      .last()
-      .simulate("click"); // expand settings
+    const { container } = renderEditor({}, done);
+    clickDataTest(container, "Table.Column.a.Name"); // expand settings
 
-    findByTestID(el, "Table.Column.a.DisplayAs")
-      .last()
-      .simulate("mouseDown");
-    findByTestID(el, "Table.Column.a.DisplayAs.number")
-      .last()
-      .simulate("click");
+    openSelect(container, "Table.Column.a.DisplayAs");
+    clickSelectOption("Table.Column.a.DisplayAs.number");
   });
 });

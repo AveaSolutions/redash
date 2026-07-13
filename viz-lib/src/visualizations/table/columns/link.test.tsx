@@ -1,30 +1,48 @@
 import React from "react";
-import enzyme from "enzyme";
+import { fireEvent, screen } from "@testing-library/react";
 
+import { queryByDataTest, renderColumnEditor } from "@/testing/rtlUtils";
 import Column from "./link";
 
-function findByTestID(wrapper: any, testId: any) {
-  return wrapper.find(`[data-test="${testId}"]`);
+function changeValue(container: HTMLElement, testId: string, value: string): void {
+  const el = queryByDataTest(container, testId);
+  if (!el) {
+    throw new Error(`Missing [data-test="${testId}"]`);
+  }
+  const input =
+    el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el : el.querySelector("input, textarea");
+  if (!input) {
+    throw new Error(`Missing input under [data-test="${testId}"]`);
+  }
+  fireEvent.change(input, { target: { value } });
 }
 
-function mount(column: any, done: any) {
-  return enzyme.mount(
+function setInputChecked(testId: string, checked: boolean): void {
+  const el = screen.getByTestId(testId);
+  const input = el instanceof HTMLInputElement ? el : el.querySelector("input");
+  if (!input) {
+    throw new Error(`Missing input for [data-test="${testId}"]`);
+  }
+  if ((input as HTMLInputElement).checked !== checked) {
+    fireEvent.click(input);
+  }
+}
+
+function renderEditor(column: any, done: () => void) {
+  return renderColumnEditor(
     <Column.Editor
       // @ts-expect-error ts-migrate(2322) FIXME: Type '{ visualizationName: string; column: any; on... Remove this comment to see the full error message
       visualizationName="Test"
       column={column}
-      onChange={changedColumn => {
-        expect(changedColumn).toMatchSnapshot();
-        done();
-      }}
-    />
+    />,
+    done
   );
 }
 
 describe("Visualizations -> Table -> Columns -> Link", () => {
   describe("Editor", () => {
     test("Changes URL template", done => {
-      const el = mount(
+      const { container } = renderEditor(
         {
           name: "a",
           linkUrlTemplate: "{{ @ }}",
@@ -32,14 +50,11 @@ describe("Visualizations -> Table -> Columns -> Link", () => {
         done
       );
 
-      findByTestID(el, "Table.ColumnEditor.Link.UrlTemplate")
-        .last()
-        .find("input")
-        .simulate("change", { target: { value: "http://{{ @ }}/index.html" } });
+      changeValue(container, "Table.ColumnEditor.Link.UrlTemplate", "http://{{ @ }}/index.html");
     });
 
     test("Changes text template", done => {
-      const el = mount(
+      const { container } = renderEditor(
         {
           name: "a",
           linkTextTemplate: "{{ @ }}",
@@ -47,14 +62,11 @@ describe("Visualizations -> Table -> Columns -> Link", () => {
         done
       );
 
-      findByTestID(el, "Table.ColumnEditor.Link.TextTemplate")
-        .last()
-        .find("input")
-        .simulate("change", { target: { value: "Text of {{ @ }}" } });
+      changeValue(container, "Table.ColumnEditor.Link.TextTemplate", "Text of {{ @ }}");
     });
 
     test("Changes title template", done => {
-      const el = mount(
+      const { container } = renderEditor(
         {
           name: "a",
           linkTitleTemplate: "{{ @ }}",
@@ -62,14 +74,11 @@ describe("Visualizations -> Table -> Columns -> Link", () => {
         done
       );
 
-      findByTestID(el, "Table.ColumnEditor.Link.TitleTemplate")
-        .last()
-        .find("input")
-        .simulate("change", { target: { value: "Title of {{ @ }}" } });
+      changeValue(container, "Table.ColumnEditor.Link.TitleTemplate", "Title of {{ @ }}");
     });
 
     test("Makes link open in new tab ", done => {
-      const el = mount(
+      renderEditor(
         {
           name: "a",
           linkOpenInNewTab: false,
@@ -77,10 +86,7 @@ describe("Visualizations -> Table -> Columns -> Link", () => {
         done
       );
 
-      findByTestID(el, "Table.ColumnEditor.Link.OpenInNewTab")
-        .last()
-        .find("input")
-        .simulate("change", { target: { checked: true } });
+      setInputChecked("Table.ColumnEditor.Link.OpenInNewTab", true);
     });
   });
 });

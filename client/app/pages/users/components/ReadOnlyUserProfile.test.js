@@ -1,5 +1,5 @@
 import React from "react";
-import { mount } from "enzyme";
+import { render, waitFor } from "@testing-library/react";
 import Group from "@/services/group";
 import ReadOnlyUserProfile from "./ReadOnlyUserProfile";
 
@@ -7,7 +7,7 @@ beforeEach(() => {
   Group.query = jest.fn().mockResolvedValue([]);
 });
 
-test("renders correctly", () => {
+test("renders correctly", async () => {
   const user = {
     id: 2,
     name: "John Doe",
@@ -16,6 +16,9 @@ test("renders correctly", () => {
     profileImageUrl: "http://www.images.com/llama.jpg",
   };
 
-  const wrapper = mount(<ReadOnlyUserProfile user={user} />);
-  expect(wrapper.find(".profile__container")).toMatchSnapshot();
+  const { container } = render(<ReadOnlyUserProfile user={user} />);
+  await waitFor(() => {
+    expect(Group.query).toHaveBeenCalled();
+  });
+  expect(container.querySelector(".profile__container")).toMatchSnapshot();
 });

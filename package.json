@@ -78,6 +78,9 @@
     "@babel/preset-typescript": "^7.26.0",
     "@babel/runtime": "^7.26.10",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/user-event": "^13.5.0",
     "@types/classnames": "^2.2.10",
     "@types/hoist-non-react-statics": "^3.3.1",
     "@types/lodash": "^4.14.157",
@@ -96,9 +99,6 @@
     "copy-webpack-plugin": "^14.0.0",
     "cross-spawn": "^7.0.6",
     "css-loader": "^6.11.0",
-    "enzyme": "^3.8.0",
-    "enzyme-adapter-react-16": "^1.7.1",
-    "enzyme-to-json": "^3.3.5",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^8.10.0",
     "eslint-config-react-app": "^7.0.1",
@@ -123,13 +123,14 @@
     "minimist": "^1.2.8",
     "mockdate": "^2.0.2",
     "npm-run-all": "^4.1.5",
+    "path-parse": "^1.0.7",
     "postcss-loader": "^4.3.0",
     "react-refresh": "^0.14.2",
     "semver": "^7.8.5",
     "serialize-javascript": "^7.0.7",
     "shell-quote": "^1.10.0",
     "style-loader": "^3.3.4",
-    "typescript": "^4.1.2",
+    "typescript": "^4.9.5",
     "webpack": "^5.95.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^6.0.0",
@@ -143,11 +144,10 @@
     "rootDir": "./client",
     "testEnvironment": "jsdom",
     "setupFiles": [
-      "./app/__tests__/enzyme_setup.js",
       "./app/__tests__/mocks.js"
     ],
-    "snapshotSerializers": [
-      "enzyme-to-json/serializer"
+    "setupFilesAfterEnv": [
+      "./app/__tests__/rtl_setup.js"
     ],
     "moduleNameMapper": {
       "^@/(.*)": "<rootDir>/app/$1",
