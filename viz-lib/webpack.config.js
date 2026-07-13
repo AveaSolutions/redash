@@ -1,4 +1,3 @@
-const LessPluginAutoPrefix = require("less-plugin-autoprefix");
 const path = require("path");
 
 const isProduction = process.env.NODE_ENV === "production";
@@ -45,11 +44,19 @@ module.exports = {
           "style-loader",
           "css-loader",
           {
+            loader: "postcss-loader",
+            options: {
+              postcssOptions: {
+                plugins: ["autoprefixer"],
+              },
+            },
+          },
+          {
             loader: "less-loader",
             options: {
               lessOptions: {
-                plugins: [new LessPluginAutoPrefix({ browsers: ["last 3 versions"] })],
                 javascriptEnabled: true,
+                math: "always",
               },
             },
           },

@@ -5,7 +5,6 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { WebpackManifestPlugin } = require("webpack-manifest-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const LessPluginAutoPrefix = require("less-plugin-autoprefix");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 
 const path = require("path");
@@ -184,13 +183,20 @@ const config = {
             }
           },
           {
+            loader: "postcss-loader",
+            options: {
+              postcssOptions: {
+                plugins: ["autoprefixer"]
+              },
+              sourceMap: !isProduction
+            }
+          },
+          {
             loader: "less-loader",
             options: {
               lessOptions: {
-                plugins: [
-                  new LessPluginAutoPrefix({ browsers: ["last 3 versions"] })
-                ],
-                javascriptEnabled: true
+                javascriptEnabled: true,
+                math: "always"
               },
               sourceMap: false
             }
