@@ -92,7 +92,6 @@ class QuerySearchResource(BaseResource):
         new_location = url_for(
             "queries",
             q=term,
-            org_slug=current_org.slug,
             drafts="true" if include_drafts else "false",
         )
         return {}, 301, {"Location": new_location}

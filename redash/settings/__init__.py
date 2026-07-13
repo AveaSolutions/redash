@@ -165,8 +165,6 @@ REFERRER_POLICY = os.environ.get(
 # for more information.
 FEATURE_POLICY = os.environ.get("REDASH_REFERRER_POLICY", "")
 
-MULTI_ORG = parse_boolean(os.environ.get("REDASH_MULTI_ORG", "false"))
-
 STATIC_ASSETS_PATH = fix_assets_path(
     os.environ.get("REDASH_STATIC_ASSETS_PATH", "../client/dist/")
 )

@@ -50,7 +50,7 @@ def create_org(org_name, user_name, email, password):
 
 @routes.route("/setup", methods=["GET", "POST"])
 def setup():
-    if current_org != None or settings.MULTI_ORG:
+    if current_org != None:
         return redirect("/")
 
     form = SetupForm(request.form)
@@ -63,6 +63,6 @@ def setup():
         g.org = default_org
         login_user(user)
 
-        return redirect(url_for("redash.index", org_slug=None))
+        return redirect(url_for("redash.index"))
 
     return render_template("setup.html", form=form)

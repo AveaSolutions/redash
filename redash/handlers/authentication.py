@@ -20,17 +20,17 @@ from sqlalchemy.orm.exc import NoResultFound
 logger = logging.getLogger(__name__)
 
 
-def render_token_login_page(template, org_slug, token, invite):
+def render_token_login_page(template, token, invite):
+    org = current_org._get_current_object()
     try:
         user_id = validate_token(token)
-        org = current_org._get_current_object()
         user = models.User.get_by_id_and_org(user_id, org)
     except NoResultFound:
         logger.exception(
             "Bad user id in token. Token= , User id= %s, Org=%s",
             user_id,
             token,
-            org_slug,
+            org.slug,
         )
         return (
             render_template(
@@ -40,7 +40,7 @@ def render_token_login_page(template, org_slug, token, invite):
             400,
         )
     except (SignatureExpired, BadSignature):
-        logger.exception("Failed to verify invite token: %s, org=%s", token, org_slug)
+        logger.exception("Failed to verify invite token: %s, org=%s", token, org.slug)
         return (
             render_template(
                 "error.html",
@@ -79,12 +79,11 @@ def render_token_login_page(template, org_slug, token, invite):
             models.db.session.add(user)
             login_user(user)
             models.db.session.commit()
-            return redirect(url_for("redash.index", org_slug=org_slug))
+            return redirect(url_for("redash.index"))
 
     return (
         render_template(
             template,
-            org_slug=org_slug,
             user=user,
         ),
         status_code,
@@ -93,12 +92,12 @@ def render_token_login_page(template, org_slug, token, invite):
 
 @routes.route(org_scoped_rule("/invite/<token>"), methods=["GET", "POST"])
 def invite(token, org_slug=None):
-    return render_token_login_page("invite.html", org_slug, token, True)
+    return render_token_login_page("invite.html", token, True)
 
 
 @routes.route(org_scoped_rule("/reset/<token>"), methods=["GET", "POST"])
 def reset(token, org_slug=None):
-    return render_token_login_page("reset.html", org_slug, token, False)
+    return render_token_login_page("reset.html", token, False)
 
 
 @routes.route(org_scoped_rule("/verify/<token>"), methods=["GET"])
@@ -123,8 +122,7 @@ def verify(token, org_slug=None):
     models.db.session.add(user)
     models.db.session.commit()
 
-    template_context = {"org_slug": org_slug} if settings.MULTI_ORG else {}
-    next_url = url_for("redash.index", **template_context)
+    next_url = url_for("redash.index")
 
     return render_template("verify.html", next_url=next_url)
 
@@ -169,12 +167,10 @@ def verification_email(org_slug=None):
 def login(org_slug=None):
     # We intentionally use == as otherwise it won't actually use the proxy. So weird :O
     # noinspection PyComparisonWithNone
-    if current_org == None and not settings.MULTI_ORG:
+    if current_org == None:
         return redirect("/setup")
-    elif current_org == None:
-        return redirect("/")
 
-    index_url = url_for("redash.index", org_slug=org_slug)
+    index_url = url_for("redash.index")
     unsafe_next_path = request.args.get("next", index_url)
     next_path = get_next_path(unsafe_next_path)
     if current_user.is_authenticated:
@@ -205,7 +201,6 @@ def login(org_slug=None):
 
     return render_template(
         "login.html",
-        org_slug=org_slug,
         next=next_path,
         email=request.form.get("email", ""),
         show_password_login=current_org.get_setting("auth_password_login_enabled"),
@@ -219,12 +214,7 @@ def logout(org_slug=None):
 
 
 def base_href():
-    if settings.MULTI_ORG:
-        base_href = url_for("redash.index", _external=True, org_slug=current_org.slug)
-    else:
-        base_href = url_for("redash.index", _external=True)
-
-    return base_href
+    return url_for("redash.index", _external=True)
 
 
 def date_time_format_config():

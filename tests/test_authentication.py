@@ -23,10 +23,8 @@ class TestApiKeyAuthentication(BaseTestCase):
         self.api_key = "10"
         self.query = self.factory.create_query(api_key=self.api_key)
         models.db.session.flush()
-        self.query_url = "/{}/api/queries/{}".format(
-            self.factory.org.slug, self.query.id
-        )
-        self.queries_url = "/{}/api/queries".format(self.factory.org.slug)
+        self.query_url = "/api/queries/{}".format(self.query.id)
+        self.queries_url = "/api/queries"
 
     def test_no_api_key(self):
         with self.app.test_client() as c:
@@ -95,7 +93,7 @@ class TestHMACAuthentication(BaseTestCase):
         self.api_key = "10"
         self.query = self.factory.create_query(api_key=self.api_key)
         models.db.session.flush()
-        self.path = "/{}/api/queries/{}".format(self.query.org.slug, self.query.id)
+        self.path = "/api/queries/{}".format(self.query.id)
         self.expires = time.time() + 1800
 
     def signature(self, expires):
@@ -128,7 +126,7 @@ class TestHMACAuthentication(BaseTestCase):
     def test_no_query_id(self):
         with self.app.test_client() as c:
             rv = c.get(
-                "/{}/api/queries".format(self.query.org.slug),
+                "/api/queries",
                 query_string={"api_key": self.api_key},
             )
             self.assertIsNone(hmac_load_user_from_request(request))
@@ -196,17 +194,9 @@ class TestCreateAndLoginUser(BaseTestCase):
 
 
 class TestGetLoginUrl(BaseTestCase):
-    def test_when_multi_org_enabled_and_org_exists(self):
-        with self.app.test_request_context("/{}/".format(self.factory.org.slug)):
-            self.assertEqual(
-                get_login_url(next=None), "/{}/login".format(self.factory.org.slug)
-            )
-
-    def test_when_multi_org_enabled_and_org_doesnt_exist(self):
-        with self.app.test_request_context(
-            "/{}_notexists/".format(self.factory.org.slug)
-        ):
-            self.assertEqual(get_login_url(next=None), "/")
+    def test_returns_login_url(self):
+        with self.app.test_request_context("/"):
+            self.assertEqual(get_login_url(next=None), "/login")
 
 
 class TestRedirectToUrlAfterLoggingIn(BaseTestCase):
@@ -221,7 +211,7 @@ class TestRedirectToUrlAfterLoggingIn(BaseTestCase):
             data={"email": self.user.email, "password": self.password},
             org=self.factory.org,
         )
-        self.assertEqual(response.location, "/{}/".format(self.user.org.slug))
+        self.assertEqual(response.location, "/")
 
     def test_simple_path_in_next_param(self):
         response = self.post_request(
