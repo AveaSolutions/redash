@@ -120,6 +120,44 @@ Optional low-priority prune (see `REMOVAL_CANDIDATES.md` Tier 1): GitHub issue/P
 
 ---
 
+## 5. Tier 2 Dependabot remediation (2026-07-13)
+
+Branch: `rcm-security-patches-2`  
+Baseline export: `dependabot-open-v5.json` (**47 open**: 40 npm + 7 pip)  
+Post-work local export: `dependabot-open-v5-post-tier2.json` (unchanged until push/rescan)
+
+### Changes implemented
+
+| Item | Action | Result |
+|---|---|---|
+| **#15 minimist** | Root `minimist@^1.2.8` devDependency pin | Root tree deduped; eslint@6 chain removed by ESLint 8 |
+| **#12 ESLint 8** | `eslint@8`, `@typescript-eslint@5`, `eslint-config-react-app@7`, `@babel/eslint-parser`; removed `babel-eslint` and `prettier/@typescript-eslint` | Lint passes (0 errors); clears ansi-regex/js-yaml/word-wrap eslint chain |
+| **#13 minimatch** | `minimatch@^9`, `brace-expansion@^2` pins; `babel-plugin-istanbul@8` | Jest coverage chain on minimatch 9+; ESLint 8 internals still on minimatch 3 (Dependabot may retain ~5) |
+| **#14 ws + semver** | `ws@^8.18`, `semver@^7.6` pins; WDS already on 6.x | No `ws@5` in tree; babel still pulls `semver@6` (npm 6 dedupe limit) |
+| **#16 tar** | Verified absent from viz-lib lockfile | Already cleared by prior Jest 28 work |
+
+### Local npm audit delta (root)
+
+| | Before Tier 2 session | After |
+|---|---|---|
+| moderate | 108 | 69 |
+| high | 82 | 5 |
+| critical | 5 | 2 |
+
+### Verification
+
+- `npm run lint` — pass (0 errors)
+- `npm test` — 77 passed (root)
+- `viz-lib npm test` — 103 passed (fixed setupFiles CJS + jest transform)
+- `npm run build` — pass (pinned `copy-webpack-plugin@11` for Node 16; v14 uses `toSorted`)
+
+### Remaining open Dependabot (47)
+
+Top packages: `lodash`, `minimatch`, `Werkzeug`, `js-yaml`, `json5`, `minimist`, `tmp`, `@babel/runtime`, `brace-expansion`.  
+**Next:** Tier 3 Flask 3 / Werkzeug 3 (7 pip); push branch and re-export after Dependabot rescan.
+
+---
+
 ## 4. References
 
 - Round 2 triage: `security-audit-2026/SECURITY_AUDIT_ROUND_2.md`
