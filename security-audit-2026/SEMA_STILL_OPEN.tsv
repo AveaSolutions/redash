@@ -1,0 +1,18 @@
+category	package	sema_rows	current_version	dependabot_open	exposure	notes
+nested-dev	js-yaml	10	3.14.0 (viz-lib), 4.3.0 (root)	yes	build/test	Sema + Dependabot agree
+nested-dev	minimist	9	1.2.5 nested, 1.2.8 top	yes	build	loader-utils chain
+nested-dev	minimatch	8	3.0.4, 3.1.5 nested; 9.x/10.x elsewhere	yes	build	jest/eslint legacy
+nested-dev	json5	4	0.5.1, 2.1.3 nested; 2.2.3 elsewhere	yes	build	babel/loader chain
+nested-dev	serialize-javascript	9	6.0.2 nested, 7.0.7 top	yes	build	webpack chain
+nested-dev	semver	5	5.7.1 (viz-lib)	yes	build	viz-lib lockfile
+nested-dev	babel-traverse	1+	6.26.0	yes	build	critical, no patch — dismiss or remove parent plugin
+nested-dev	nth-check	1	1.0.2	yes	build	svgo/css-select chain
+nested-dev	decode-uri-component	1	0.2.0	yes	build	query-string chain
+nested-dev	brace-expansion	2	1.1.11	yes	build	minimatch chain
+nested-dev	hosted-git-info	2	2.7.1, 2.8.8	yes	build	npm metadata chain
+nested-dev	path-parse	2	1.0.6	yes	build	rollup/plugin chain
+python-held	werkzeug	10	2.3.8	yes	runtime	Tier 3 Flask 3 — deliberate hold
+python-held	flask	2	2.3.2	yes	runtime	Tier 3 Flask 3 — deliberate hold
+python-held	sqlalchemy-searchable	1	0.10.6	no	runtime	PG compatibility pin — document for auditors
+dependabot-only	@babel/runtime	0	7.7.x–7.29.x mixed	yes	build	40 npm audit findings suggest bulk update
+dependabot-only	cross-spawn	0	6.0.5	yes	build	webpack-dev-server chain
