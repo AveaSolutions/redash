@@ -266,7 +266,6 @@ def client_config():
         "disablePublicUrls": current_org.get_setting("disable_public_urls"),
         "allowCustomJSVisualizations": settings.FEATURE_ALLOW_CUSTOM_JS_VISUALIZATIONS,
         "autoPublishNamedQueries": settings.FEATURE_AUTO_PUBLISH_NAMED_QUERIES,
-        "extendedAlertOptions": settings.FEATURE_EXTENDED_ALERT_OPTIONS,
         "mailSettingsMissing": not settings.email_server_is_configured(),
         "dashboardRefreshIntervals": settings.DASHBOARD_REFRESH_INTERVALS,
         "queryRefreshIntervals": settings.QUERY_REFRESH_INTERVALS,

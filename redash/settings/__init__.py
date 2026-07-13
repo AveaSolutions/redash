@@ -336,12 +336,6 @@ FEATURE_ALLOW_CUSTOM_JS_VISUALIZATIONS = parse_boolean(
 FEATURE_AUTO_PUBLISH_NAMED_QUERIES = parse_boolean(
     os.environ.get("REDASH_FEATURE_AUTO_PUBLISH_NAMED_QUERIES", "true")
 )
-FEATURE_EXTENDED_ALERT_OPTIONS = parse_boolean(
-    os.environ.get("REDASH_FEATURE_EXTENDED_ALERT_OPTIONS", "false")
-)
-
-# BigQuery
-BIGQUERY_HTTP_TIMEOUT = int(os.environ.get("REDASH_BIGQUERY_HTTP_TIMEOUT", "600"))
 
 # Allow Parameters in Embeds
 # WARNING: Deprecated!
@@ -353,13 +347,6 @@ ALLOW_PARAMETERS_IN_EMBEDS = parse_boolean(
 # Enhance schema fetching
 SCHEMA_RUN_TABLE_SIZE_CALCULATIONS = parse_boolean(
     os.environ.get("REDASH_SCHEMA_RUN_TABLE_SIZE_CALCULATIONS", "false")
-)
-
-# kylin
-KYLIN_OFFSET = int(os.environ.get("REDASH_KYLIN_OFFSET", 0))
-KYLIN_LIMIT = int(os.environ.get("REDASH_KYLIN_LIMIT", 50000))
-KYLIN_ACCEPT_PARTIAL = parse_boolean(
-    os.environ.get("REDASH_KYLIN_ACCEPT_PARTIAL", "false")
 )
 
 # sqlparse

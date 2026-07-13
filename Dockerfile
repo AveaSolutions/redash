@@ -3,12 +3,9 @@ FROM node:20-bullseye AS frontend-builder
 # Controls whether to build the frontend assets
 ARG skip_frontend_build
 
-ENV CYPRESS_INSTALL_BINARY=0
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
-
 # This codebase's lockfiles are npm v1 and depend on the `sql-formatter` git
 # dependency, which npm 7+ rebuilds from source and fails on. Pin npm 6 (the
-# version node:12 shipped, which this project was authored against).
+# version node:20 shipped, which this project was authored against).
 RUN npm install --global --force npm@6.14.18
 
 RUN useradd -m -d /frontend redash

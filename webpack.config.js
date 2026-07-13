@@ -262,8 +262,7 @@ const config = {
           "/invite",
           "/setup",
           "/status.json",
-          "/api",
-          "/oauth"
+          "/api"
         ],
         target: redashBackend + "/",
         changeOrigin: false,

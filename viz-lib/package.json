@@ -19,12 +19,9 @@
     "test": "jest",
     "test:watch": "jest --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/getredash/redash.git"
-  },
-  "author": "Redash",
+  "author": "Avea Solutions",
   "license": "BSD-2-Clause",
+  "private": true,
   "peerDependencies": {
     "antd": ">=4.0.0",
     "@ant-design/icons": ">=4.0.0",
