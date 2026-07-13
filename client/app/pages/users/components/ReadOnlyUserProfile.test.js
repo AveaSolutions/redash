@@ -1,5 +1,5 @@
 import React from "react";
-import renderer from "react-test-renderer";
+import { mount } from "enzyme";
 import Group from "@/services/group";
 import ReadOnlyUserProfile from "./ReadOnlyUserProfile";
 
@@ -16,7 +16,6 @@ test("renders correctly", () => {
     profileImageUrl: "http://www.images.com/llama.jpg",
   };
 
-  const component = renderer.create(<ReadOnlyUserProfile user={user} />);
-  const tree = component.toJSON();
-  expect(tree).toMatchSnapshot();
+  const wrapper = mount(<ReadOnlyUserProfile user={user} />);
+  expect(wrapper.find(".profile__container")).toMatchSnapshot();
 });

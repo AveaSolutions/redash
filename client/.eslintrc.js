@@ -3,11 +3,10 @@ module.exports = {
   parser: "@typescript-eslint/parser",
   extends: [
     "./eslint-config-redash-base",
-    "plugin:compat/recommended",
     "prettier",
     "plugin:jsx-a11y/recommended",
   ],
-  plugins: ["jest", "compat", "no-only-tests", "@typescript-eslint", "jsx-a11y"],
+  plugins: ["jest", "no-only-tests", "@typescript-eslint", "jsx-a11y"],
   settings: {
     "import/resolver": "webpack",
   },
@@ -20,8 +19,6 @@ module.exports = {
     "no-debugger": process.env.NODE_ENV === "production" ? 2 : 0,
     // v5 typescript-eslint defaults are stricter than v2; preserve prior behavior
     "@typescript-eslint/ban-types": "off",
-    // eslint-plugin-compat v4 false-positives on document.body property access
-    "compat/compat": "off",
     // CRA 7 enables this; codebase uses anonymous default exports throughout
     "import/no-anonymous-default-export": "off",
     "jsx-a11y/anchor-is-valid": [
