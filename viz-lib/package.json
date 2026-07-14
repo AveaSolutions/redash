@@ -9,10 +9,11 @@
     "type-gen": "tsc --emitDeclarationOnly",
     "build:babel:base": "babel src --out-dir lib --source-maps --ignore 'src/**/*.test.js' --ignore 'src/**/*.test.tsx' --ignore 'src/testing/**' --copy-files --no-copy-ignored --extensions .ts,.tsx,.js,.jsx",
     "build:babel": "npm run type-gen && npm run build:babel:base",
-    "build": "NODE_ENV=production npm-run-all clean build:babel",
+    "build": "NODE_ENV=production run-s clean build:babel",
     "watch:babel": "npm run build:babel:base -- --watch",
     "watch": "npm run watch:babel",
     "version": "npm run build",
+    "preinstall": "node -e \"if (require('fs').existsSync('package-lock.json')) require('child_process').execSync('npx npm-force-resolutions', {stdio:'inherit'})\"",
     "test": "jest",
     "test:watch": "jest --watch"
   },
@@ -49,23 +50,26 @@
     "@types/tinycolor2": "^1.4.2",
     "babel-jest": "^28.1.3",
     "babel-plugin-istanbul": "^8.0.0",
-    "babel-plugin-module-resolver": "^4.0.0",
+    "babel-plugin-module-resolver": "^5.0.3",
     "form-data": "^4.0.4",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^28.1.3",
     "jest-environment-jsdom": "^28.1.3",
-    "js-yaml": "^3.15.0",
-    "json5": "^2.2.3",
     "minimatch": "^9.0.5",
     "brace-expansion": "^2.0.2",
     "minimist": "^1.2.8",
     "mockdate": "^2.0.5",
-    "npm-run-all": "^4.1.5",
+    "npm-run-all2": "^9.0.2",
+    "npm-force-resolutions": "^0.0.10",
     "path-parse": "^1.0.7",
     "prop-types": "^15.7.2",
     "semver": "^7.8.5",
     "shell-quote": "^1.10.0",
     "typescript": "^4.1.2"
+  },
+  "resolutions": {
+    "js-yaml": "3.15.0",
+    "json5": "2.2.3"
   },
   "files": [
     "lib"
