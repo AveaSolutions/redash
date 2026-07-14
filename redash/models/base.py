@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_sqlalchemy.query import Query
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import object_session
+from sqlalchemy.sql.sqltypes import INTEGER
 from sqlalchemy_searchable import SearchQueryMixin, vectorizer
 
 from redash import settings
@@ -11,15 +12,43 @@ from redash import settings
 db = SQLAlchemy(session_options={"expire_on_commit": False})
 
 
+class _LegacyEntityZero(object):
+    def __init__(self, model_class):
+        self.class_ = model_class
+
+
+class _LegacyQueryEntity(object):
+    def __init__(self, model_class):
+        self.entity_zero = _LegacyEntityZero(model_class)
+
+
 class SearchBaseQuery(Query, SearchQueryMixin):
     """
     The SQA query class to use when full text search is wanted.
     """
 
+    @property
+    def _entities(self):
+        # SQLAlchemy-Searchable 0.10.6 expects the legacy Query._entities API
+        # removed in Flask-SQLAlchemy 3 / SQLAlchemy 1.4.
+        entities = []
+        for description in self.column_descriptions:
+            entity = description.get("entity")
+            if entity is not None:
+                entities.append(_LegacyQueryEntity(entity))
+        if not entities:
+            expr = self.column_descriptions[0].get("expr")
+            if expr is not None:
+                entities.append(_LegacyQueryEntity(expr))
+        return entities
 
-@vectorizer(db.Integer)
-def integer_vectorizer(column):
+
+def _integer_vectorizer(column):
     return db.func.cast(column, db.Text)
+
+
+vectorizer(db.Integer)(_integer_vectorizer)
+vectorizer(INTEGER)(_integer_vectorizer)
 
 
 @vectorizer(postgresql.UUID)
