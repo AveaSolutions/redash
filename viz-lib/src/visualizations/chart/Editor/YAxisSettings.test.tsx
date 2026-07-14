@@ -1,35 +1,64 @@
 import React from "react";
-import enzyme from "enzyme";
+import { fireEvent, render, screen } from "@testing-library/react";
 
+import {
+  clickDataTest,
+  elementExists,
+  queryByDataTest,
+  renderOptionsEditor,
+} from "@/testing/rtlUtils";
 import getOptions from "../getOptions";
 import YAxisSettings from "./YAxisSettings";
 
-function findByTestID(wrapper: any, testId: any) {
-  return wrapper.find(`[data-test="${testId}"]`);
+function openSelect(container: HTMLElement, testId: string): void {
+  const wrapper = queryByDataTest(container, testId);
+  const combobox = wrapper?.querySelector('[role="combobox"]');
+  if (!combobox) {
+    throw new Error(`Missing combobox under [data-test="${testId}"]`);
+  }
+  fireEvent.mouseDown(combobox);
 }
 
-function elementExists(wrapper: any, testId: any) {
-  return findByTestID(wrapper, testId).length > 0;
+function changeValue(container: HTMLElement, testId: string, value: string): void {
+  const el = queryByDataTest(container, testId);
+  if (!el) {
+    throw new Error(`Missing [data-test="${testId}"]`);
+  }
+  const input =
+    el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el : el.querySelector("input, textarea");
+  if (!input) {
+    throw new Error(`Missing input under [data-test="${testId}"]`);
+  }
+  fireEvent.change(input, { target: { value } });
 }
 
-function mount(options: any, done: any) {
+function clickSelectOption(testId: string): void {
+  fireEvent.click(screen.getByTestId(testId));
+}
+
+function renderEditor(options: any, done?: () => void) {
   options = getOptions(options);
-  return enzyme.mount(
+  const component = (
+    <YAxisSettings visualizationName="Test" data={{ columns: [], rows: [] }} options={options} />
+  );
+
+  if (done) {
+    return renderOptionsEditor(component, done);
+  }
+
+  return render(
     <YAxisSettings
       visualizationName="Test"
       data={{ columns: [], rows: [] }}
       options={options}
-      onOptionsChange={changedOptions => {
-        expect(changedOptions).toMatchSnapshot();
-        done();
-      }}
+      onOptionsChange={() => {}}
     />
   );
 }
 
 describe("Visualizations -> Chart -> Editor -> Y-Axis Settings", () => {
   test("Changes axis type", done => {
-    const el = mount(
+    const { container } = renderEditor(
       {
         globalSeriesType: "column",
         yAxis: [{ type: "linear" }, { type: "linear", opposite: true }],
@@ -37,16 +66,12 @@ describe("Visualizations -> Chart -> Editor -> Y-Axis Settings", () => {
       done
     );
 
-    findByTestID(el, "Chart.LeftYAxis.Type")
-      .last()
-      .simulate("mouseDown");
-    findByTestID(el, "Chart.LeftYAxis.Type.Category")
-      .last()
-      .simulate("click");
+    openSelect(container, "Chart.LeftYAxis.Type");
+    clickSelectOption("Chart.LeftYAxis.Type.Category");
   });
 
   test("Changes axis name", done => {
-    const el = mount(
+    const { container } = renderEditor(
       {
         globalSeriesType: "column",
         yAxis: [{ type: "linear" }, { type: "linear", opposite: true }],
@@ -54,13 +79,11 @@ describe("Visualizations -> Chart -> Editor -> Y-Axis Settings", () => {
       done
     );
 
-    findByTestID(el, "Chart.LeftYAxis.Name")
-      .last()
-      .simulate("change", { target: { value: "test" } });
+    changeValue(container, "Chart.LeftYAxis.Name", "test");
   });
 
   test("Changes axis min value", done => {
-    const el = mount(
+    const { container } = renderEditor(
       {
         globalSeriesType: "column",
         yAxis: [{ type: "linear" }, { type: "linear", opposite: true }],
@@ -68,14 +91,11 @@ describe("Visualizations -> Chart -> Editor -> Y-Axis Settings", () => {
       done
     );
 
-    findByTestID(el, "Chart.LeftYAxis.RangeMin")
-      .find("input")
-      .last()
-      .simulate("change", { target: { value: "50" } });
+    changeValue(container, "Chart.LeftYAxis.RangeMin", "50");
   });
 
   test("Changes axis max value", done => {
-    const el = mount(
+    const { container } = renderEditor(
       {
         globalSeriesType: "column",
         yAxis: [{ type: "linear" }, { type: "linear", opposite: true }],
@@ -83,37 +103,32 @@ describe("Visualizations -> Chart -> Editor -> Y-Axis Settings", () => {
       done
     );
 
-    findByTestID(el, "Chart.LeftYAxis.RangeMax")
-      .find("input")
-      .last()
-      .simulate("change", { target: { value: "200" } });
+    changeValue(container, "Chart.LeftYAxis.RangeMax", "200");
   });
 
   describe("for non-heatmap", () => {
     test("Right Y Axis should be available", () => {
-      // @ts-expect-error ts-migrate(2554) FIXME: Expected 2 arguments, but got 1.
-      const el = mount({
+      const { container } = renderEditor({
         globalSeriesType: "column",
         yAxis: [{ type: "linear" }, { type: "linear", opposite: true }],
       });
 
-      expect(elementExists(el, "Chart.RightYAxis.Type")).toBeTruthy();
+      expect(elementExists(container, "Chart.RightYAxis.Type")).toBeTruthy();
     });
   });
 
   describe("for heatmap", () => {
     test("Right Y Axis should not be available", () => {
-      // @ts-expect-error ts-migrate(2554) FIXME: Expected 2 arguments, but got 1.
-      const el = mount({
+      const { container } = renderEditor({
         globalSeriesType: "heatmap",
         yAxis: [{ type: "linear" }, { type: "linear", opposite: true }],
       });
 
-      expect(elementExists(el, "Chart.RightYAxis.Type")).toBeFalsy();
+      expect(elementExists(container, "Chart.RightYAxis.Type")).toBeFalsy();
     });
 
     test("Sets Sort X Values option", done => {
-      const el = mount(
+      const { container } = renderEditor(
         {
           globalSeriesType: "heatmap",
           sortY: false,
@@ -121,13 +136,11 @@ describe("Visualizations -> Chart -> Editor -> Y-Axis Settings", () => {
         done
       );
 
-      findByTestID(el, "Chart.LeftYAxis.Sort")
-        .last()
-        .simulate("click");
+      clickDataTest(container, "Chart.LeftYAxis.Sort");
     });
 
     test("Sets Reverse Y Values option", done => {
-      const el = mount(
+      const { container } = renderEditor(
         {
           globalSeriesType: "heatmap",
           reverseY: false,
@@ -135,9 +148,7 @@ describe("Visualizations -> Chart -> Editor -> Y-Axis Settings", () => {
         done
       );
 
-      findByTestID(el, "Chart.LeftYAxis.Reverse")
-        .last()
-        .simulate("click");
+      clickDataTest(container, "Chart.LeftYAxis.Reverse");
     });
   });
 });

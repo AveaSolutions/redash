@@ -12,14 +12,13 @@ os.environ["RQ_REDIS_URL"] = os.environ.get(
     "REDASH_REDIS_URL", "redis://localhost:6379/0"
 ).replace("/5", "/6")
 
-os.environ["REDASH_MULTI_ORG"] = "true"
 
 # Make sure rate limit is enabled
 os.environ["REDASH_RATELIMIT_ENABLED"] = "true"
 
 os.environ["REDASH_ENFORCE_CSRF"] = "false"
 
-from redash import limiter, redis_connection
+from redash import limiter, redis_connection, settings
 from redash.app import create_app
 from redash.models import db
 from redash.utils import json_dumps
@@ -57,6 +56,9 @@ class BaseTestCase(TestCase):
         db.create_all()
         self.factory = Factory()
         self.client = self.app.test_client()
+        os.makedirs(settings.STATIC_ASSETS_PATH, exist_ok=True)
+        with open(os.path.join(settings.STATIC_ASSETS_PATH, "index.html"), "w") as f:
+            f.write("<html><body></body></html>")
 
     def tearDown(self):
         db.session.remove()
@@ -76,12 +78,6 @@ class BaseTestCase(TestCase):
     ):
         if user is None:
             user = self.factory.user
-
-        if org is None:
-            org = self.factory.org
-
-        if org is not False:
-            path = "/{}{}".format(org.slug, path)
 
         if user:
             authenticate_request(self.client, user)
@@ -107,17 +103,11 @@ class BaseTestCase(TestCase):
         return response
 
     def get_request(self, path, org=None, headers=None, client=None):
-        if org:
-            path = "/{}{}".format(org.slug, path)
-
         if client is None:
             client = self.client
         return client.get(path, headers=headers)
 
     def post_request(self, path, data=None, org=None, headers=None):
-        if org:
-            path = "/{}{}".format(org.slug, path)
-
         return self.client.post(path, data=data, headers=headers)
 
     def assertResponseEqual(self, expected, actual):

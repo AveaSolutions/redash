@@ -151,7 +151,7 @@ HSTS_INCLUDE_SUBDOMAINS = parse_boolean(
 # for more information. E.g.:
 CONTENT_SECURITY_POLICY = os.environ.get(
     "REDASH_CONTENT_SECURITY_POLICY",
-    "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval'; font-src 'self' data:; img-src 'self' http: https: data: blob:; object-src 'none'; frame-ancestors 'none'; frame-src redash.io;",
+    "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval'; font-src 'self' data:; img-src 'self' http: https: data: blob:; object-src 'none'; frame-ancestors 'none';",
 )
 CONTENT_SECURITY_POLICY_REPORT_URI = os.environ.get(
     "REDASH_CONTENT_SECURITY_POLICY_REPORT_URI", ""
@@ -175,8 +175,6 @@ REFERRER_POLICY = os.environ.get(
 # See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy
 # for more information.
 FEATURE_POLICY = os.environ.get("REDASH_REFERRER_POLICY", "")
-
-MULTI_ORG = parse_boolean(os.environ.get("REDASH_MULTI_ORG", "false"))
 
 STATIC_ASSETS_PATH = fix_assets_path(
     os.environ.get("REDASH_STATIC_ASSETS_PATH", "../client/dist/")
@@ -335,7 +333,6 @@ PAGE_SIZE_OPTIONS = list(
 TABLE_CELL_MAX_JSON_SIZE = int(os.environ.get("REDASH_TABLE_CELL_MAX_JSON_SIZE", 50000))
 
 # Features:
-VERSION_CHECK = parse_boolean(os.environ.get("REDASH_VERSION_CHECK", "true"))
 FEATURE_DISABLE_REFRESH_QUERIES = parse_boolean(
     os.environ.get("REDASH_FEATURE_DISABLE_REFRESH_QUERIES", "false")
 )
@@ -348,12 +345,6 @@ FEATURE_ALLOW_CUSTOM_JS_VISUALIZATIONS = parse_boolean(
 FEATURE_AUTO_PUBLISH_NAMED_QUERIES = parse_boolean(
     os.environ.get("REDASH_FEATURE_AUTO_PUBLISH_NAMED_QUERIES", "true")
 )
-FEATURE_EXTENDED_ALERT_OPTIONS = parse_boolean(
-    os.environ.get("REDASH_FEATURE_EXTENDED_ALERT_OPTIONS", "false")
-)
-
-# BigQuery
-BIGQUERY_HTTP_TIMEOUT = int(os.environ.get("REDASH_BIGQUERY_HTTP_TIMEOUT", "600"))
 
 # Allow Parameters in Embeds
 # WARNING: Deprecated!
@@ -365,13 +356,6 @@ ALLOW_PARAMETERS_IN_EMBEDS = parse_boolean(
 # Enhance schema fetching
 SCHEMA_RUN_TABLE_SIZE_CALCULATIONS = parse_boolean(
     os.environ.get("REDASH_SCHEMA_RUN_TABLE_SIZE_CALCULATIONS", "false")
-)
-
-# kylin
-KYLIN_OFFSET = int(os.environ.get("REDASH_KYLIN_OFFSET", 0))
-KYLIN_LIMIT = int(os.environ.get("REDASH_KYLIN_LIMIT", 50000))
-KYLIN_ACCEPT_PARTIAL = parse_boolean(
-    os.environ.get("REDASH_KYLIN_ACCEPT_PARTIAL", "false")
 )
 
 # sqlparse
@@ -390,8 +374,6 @@ REQUESTS_ALLOW_REDIRECTS = parse_boolean(
 ENFORCE_CSRF = parse_boolean(
     os.environ.get("REDASH_ENFORCE_CSRF", "false")
 )
-
-# Databricks
 
 CSRF_TIME_LIMIT = int(os.environ.get("REDASH_CSRF_TIME_LIMIT", 3600 * 6))
 

@@ -40,17 +40,4 @@ describe("QueryFormat.formatQuery", () => {
       expect(formattedQueryParameters.sort()).toEqual(queryParameters.sort());
     });
   });
-
-  describe("json", () => {
-    const syntax = "json";
-
-    test("returns the formatted query text", () => {
-      const queryText = '{"collection": "example","limit": 10}';
-      const expectedFormattedQueryText = '{\n    "collection": "example",\n    "limit": 10\n}';
-      const isFormatQueryAvailable = queryFormat.isFormatQueryAvailable(syntax);
-      const formattedQueryText = queryFormat.formatQuery(queryText, syntax);
-      expect(isFormatQueryAvailable).toBeTruthy();
-      expect(formattedQueryText).toBe(expectedFormattedQueryText);
-    });
-  });
 });

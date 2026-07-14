@@ -48,9 +48,7 @@ export default function QueryExecutionMetadata({
             <span className="m-r-5">
               <Tooltip
                 title={
-                  "Result truncated to " +
-                  queryResultData.rows.length +
-                  " rows. Databricks may truncate query results that are unstably large."
+                  "Result truncated to " + queryResultData.rows.length + " rows."
                 }>
                 <WarningTwoTone twoToneColor="#FF9800" />
               </Tooltip>

@@ -4,7 +4,7 @@ import routeWithUserSession from "@/components/ApplicationArea/routeWithUserSess
 import Link from "@/components/Link";
 import PageHeader from "@/components/PageHeader";
 import Paginator from "@/components/Paginator";
-import EmptyState, { EmptyStateHelpMessage } from "@/components/empty-state/EmptyState";
+import EmptyState from "@/components/empty-state/EmptyState";
 import { wrap as itemsList, ControllerType } from "@/components/items-list/ItemsList";
 import { ResourceItemsSource } from "@/components/items-list/classes/ItemsSource";
 import { StateStorage } from "@/components/items-list/classes/StateStorage";
@@ -101,7 +101,6 @@ class AlertsList extends React.Component {
                   icon="fa fa-bell-o"
                   illustration="alert"
                   description="Get notified on certain events"
-                  helpMessage={<EmptyStateHelpMessage helpTriggerType="ALERTS" />}
                   showAlertStep
                 />
               </DynamicComponent>

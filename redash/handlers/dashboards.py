@@ -202,7 +202,6 @@ class DashboardResource(BaseResource):
             response["public_url"] = url_for(
                 "redash.public_dashboard",
                 token=api_key.api_key,
-                org_slug=self.current_org.slug,
                 _external=True,
             )
             response["api_key"] = api_key.api_key
@@ -337,7 +336,6 @@ class DashboardShareResource(BaseResource):
         public_url = url_for(
             "redash.public_dashboard",
             token=api_key.api_key,
-            org_slug=self.current_org.slug,
             _external=True,
         )
 

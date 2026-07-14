@@ -135,5 +135,5 @@ class TestSession(BaseTestCase):
     # really simple test just to trigger this route
     def test_get(self):
         self.make_request(
-            "get", "/default/api/session", user=self.factory.user, org=False
+            "get", "/api/session", user=self.factory.user, org=False
         )

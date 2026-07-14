@@ -25,7 +25,6 @@ DISABLE_PUBLIC_URLS = parse_boolean(
 )
 
 settings = {
-    "beacon_consent": None,
     "auth_password_login_enabled": PASSWORD_LOGIN_ENABLED,
     "date_format": DATE_FORMAT,
     "time_format": TIME_FORMAT,

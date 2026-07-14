@@ -110,7 +110,6 @@ class DataSourcesList extends React.Component {
       types: reject(this.state.dataSourceTypes, "deprecated"),
       sourceType: "Data Source",
       imageFolder: IMG_ROOT,
-      helpTriggerPrefix: "DS_",
       onCreate: this.createDataSource,
     });
 

@@ -18,16 +18,7 @@ logger = logging.getLogger("authentication")
 
 
 def get_login_url(external=False, next="/"):
-    if settings.MULTI_ORG and current_org == None:
-        login_url = "/"
-    elif settings.MULTI_ORG:
-        login_url = url_for(
-            "redash.login", org_slug=current_org.slug, next=next, _external=external
-        )
-    else:
-        login_url = url_for("redash.login", next=next, _external=external)
-
-    return login_url
+    return url_for("redash.login", next=next, _external=external)
 
 
 def sign(key, path, expires):
@@ -189,15 +180,7 @@ def redirect_to_login():
 
 def logout_and_redirect_to_index():
     logout_user()
-
-    if settings.MULTI_ORG and current_org == None:
-        index_url = "/"
-    elif settings.MULTI_ORG:
-        index_url = url_for("redash.index", org_slug=current_org.slug, _external=False)
-    else:
-        index_url = url_for("redash.index", _external=False)
-
-    return redirect(index_url)
+    return redirect(url_for("redash.index", _external=False))
 
 
 def init_app(app):

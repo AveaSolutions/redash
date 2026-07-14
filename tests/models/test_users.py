@@ -105,7 +105,7 @@ class TestUserDetail(BaseTestCase):
 
     def test_sync(self):
         with authenticated_user(self.client) as user:
-            rv = self.client.get("/default/")
+            rv = self.client.get("/")
             timestamp = dt_from_timestamp(
                 redis_connection.hget(LAST_ACTIVE_KEY, user.id)
             )

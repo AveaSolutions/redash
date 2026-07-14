@@ -3,7 +3,6 @@ import { first, includes } from "lodash";
 import Menu from "antd/lib/menu";
 import Link from "@/components/Link";
 import PlainButton from "@/components/PlainButton";
-import HelpTrigger from "@/components/HelpTrigger";
 import CreateDashboardDialog from "@/components/dashboards/CreateDashboardDialog";
 import { useCurrentRoute } from "@/components/ApplicationArea/Router";
 import { Auth, currentUser } from "@/services/auth";
@@ -14,7 +13,6 @@ import DesktopOutlinedIcon from "@ant-design/icons/DesktopOutlined";
 import CodeOutlinedIcon from "@ant-design/icons/CodeOutlined";
 import AlertOutlinedIcon from "@ant-design/icons/AlertOutlined";
 import PlusOutlinedIcon from "@ant-design/icons/PlusOutlined";
-import QuestionCircleOutlinedIcon from "@ant-design/icons/QuestionCircleOutlined";
 import SettingOutlinedIcon from "@ant-design/icons/SettingOutlined";
 import VersionInfo from "./VersionInfo";
 
@@ -147,12 +145,6 @@ export default function DesktopNavbar() {
       </NavbarSection>
 
       <NavbarSection>
-        <Menu.Item key="help">
-          <HelpTrigger showTooltip={false} type="HOME" tabIndex={0}>
-            <QuestionCircleOutlinedIcon />
-            <span className="desktop-navbar-label">Help</span>
-          </HelpTrigger>
-        </Menu.Item>
         {firstSettingsTab && (
           <Menu.Item key="settings" className={activeState.dataSources ? "navbar-active-item" : null}>
             <Link href={firstSettingsTab.path} data-test="SettingsLink">

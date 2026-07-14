@@ -95,11 +95,6 @@ const config = {
       baseHref,
       title: htmlTitle
     }),
-    new HtmlWebpackPlugin({
-      template: "./client/app/multi_org.html",
-      filename: "multi_org.html",
-      excludeChunks: ["server"]
-    }),
     isProduction &&
       new MiniCssExtractPlugin({
         filename: "[name].[contenthash].css"
@@ -153,7 +148,7 @@ const config = {
       },
       {
         test: /\.html$/,
-        exclude: [/node_modules/, /index\.html/, /multi_org\.html/],
+        exclude: [/node_modules/, /index\.html/],
         type: "asset/source"
       },
       {
@@ -262,8 +257,7 @@ const config = {
           "/invite",
           "/setup",
           "/status.json",
-          "/api",
-          "/oauth"
+          "/api"
         ],
         target: redashBackend + "/",
         changeOrigin: false,

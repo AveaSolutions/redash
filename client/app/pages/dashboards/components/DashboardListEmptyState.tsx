@@ -3,11 +3,10 @@ import * as PropTypes from "prop-types";
 import Button from "antd/lib/button";
 import BigMessage from "@/components/BigMessage";
 import NoTaggedObjectsFound from "@/components/NoTaggedObjectsFound";
-import EmptyState, { EmptyStateHelpMessage } from "@/components/empty-state/EmptyState";
+import EmptyState from "@/components/empty-state/EmptyState";
 import DynamicComponent from "@/components/DynamicComponent";
 import CreateDashboardDialog from "@/components/dashboards/CreateDashboardDialog";
 import { currentUser } from "@/services/auth";
-import HelpTrigger from "@/components/HelpTrigger";
 
 export interface DashboardListEmptyStateProps {
   page: string;
@@ -30,10 +29,7 @@ export default function DashboardListEmptyState({ page, searchTerm, selectedTags
         <span>
           <Button type="primary" size="small" onClick={() => CreateDashboardDialog.showModal()}>
             Create your first dashboard!
-          </Button>{" "}
-          <HelpTrigger className="f-14" type="DASHBOARDS" showTooltip={false}>
-            Need help?
-          </HelpTrigger>
+          </Button>
         </span>
       ) : (
         <span>Sorry, we couldn't find anything.</span>
@@ -46,7 +42,6 @@ export default function DashboardListEmptyState({ page, searchTerm, selectedTags
             icon="zmdi zmdi-view-quilt"
             description="See the big picture"
             illustration="dashboard"
-            helpMessage={<EmptyStateHelpMessage helpTriggerType="DASHBOARDS" />}
             showDashboardStep
           />
         </DynamicComponent>
