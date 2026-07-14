@@ -9,7 +9,6 @@ import Alert from "antd/lib/alert";
 import notification from "@/services/notification";
 import { wrap as wrapDialog, DialogPropType } from "@/components/DialogWrapper";
 import InputWithCopy from "@/components/InputWithCopy";
-import HelpTrigger from "@/components/HelpTrigger";
 
 const API_SHARE_URL = "api/dashboards/{id}/share";
 
@@ -43,7 +42,7 @@ class ShareDashboardDialog extends React.Component {
       <React.Fragment>
         Share Dashboard
         <div className="modal-header-desc">
-          Allow public access to this dashboard with a secret address. <HelpTrigger type="SHARE_DASHBOARD" />
+          Allow public access to this dashboard with a secret address.
         </div>
       </React.Fragment>
     );

@@ -1,28 +1,27 @@
 import click
 import simplejson
 from flask import current_app
-from flask.cli import FlaskGroup, run_command, with_appcontext
+from flask.cli import FlaskGroup, run_command
 from rq import Connection
 
-from redash import __version__, create_app, settings, rq_redis_connection
-from redash.cli import data_sources, database, groups, organization, queries, users, rq
+from redash import __version__, create_app, rq_redis_connection, settings
+from redash.cli import (
+    data_sources,
+    database,
+    groups,
+    organization,
+    queries,
+    rq,
+    users,
+)
 from redash.monitor import get_status
 
 
-def create(group):
-    app = current_app or create_app()
-    group.app = app
-
-    @app.shell_context_processor
-    def shell_context():
-        from redash import models, settings
-
-        return {"models": models, "settings": settings}
-
-    return app
+def create():
+    return current_app or create_app()
 
 
-@click.group(cls=FlaskGroup, create_app=create)
+@click.group(cls=FlaskGroup, create_app=create, add_default_commands=False)
 def manager():
     """Management script for Redash"""
 
@@ -62,26 +61,11 @@ def send_test_mail(email=None):
     """
     Send test message to EMAIL (default: the address you defined in MAIL_DEFAULT_SENDER)
     """
-    from redash import mail
     from flask_mail import Message
+
+    from redash import mail
 
     if email is None:
         email = settings.MAIL_DEFAULT_SENDER
 
-    mail.send(
-        Message(
-            subject="Test Message from Redash", recipients=[email], body="Test message."
-        )
-    )
-
-
-@manager.command("shell")
-@with_appcontext
-def shell():
-    import sys
-    from ptpython import repl
-    from flask.globals import _app_ctx_stack
-
-    app = _app_ctx_stack.top.app
-
-    repl.embed(globals=app.make_shell_context())
+    mail.send(Message(subject="Test Message from Redash", recipients=[email], body="Test message."))

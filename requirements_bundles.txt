@@ -1,9 +1,9 @@
-# These are the requirements that the extension bundle
-# loading mechanism need on Python 2 and can be removed
-# when moved to Python 3.
-# It's automatically installed when running npm run bundle
-
-# These can be removed when upgrading to Python 3.x
-# importlib-metadata>=1.6  # remove when on 3.8
+# Dependencies of the extension/bundle loading mechanism
+# (redash/extensions.py and bin/bundle-extensions).
+# It's automatically installed when running npm run bundle.
+#
+# importlib-metadata is pinned to 4.13.0: redash/extensions.py and
+# bin/bundle-extensions use the legacy dict-style entry_points() API,
+# which was removed in importlib-metadata 5.0.
 importlib-metadata==4.13.0
-importlib_resources==1.5  # remove when on 3.9
+importlib_resources==5.13.0

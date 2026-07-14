@@ -1,4 +1,4 @@
-import { get, find, toUpper } from "lodash";
+import { get, find } from "lodash";
 import React from "react";
 import PropTypes from "prop-types";
 
@@ -8,7 +8,6 @@ import navigateTo from "@/components/ApplicationArea/navigateTo";
 import LoadingState from "@/components/items-list/components/LoadingState";
 import DynamicForm from "@/components/dynamic-form/DynamicForm";
 import helper from "@/components/dynamic-form/dynamicFormHelper";
-import HelpTrigger, { TYPES as HELP_TRIGGER_TYPES } from "@/components/HelpTrigger";
 import wrapSettingsTab from "@/components/SettingsWrapper";
 
 import DataSource, { IMG_ROOT } from "@/services/data-source";
@@ -102,7 +101,6 @@ class EditDataSource extends React.Component {
   renderForm() {
     const { dataSource, type } = this.state;
     const fields = helper.getFields(type, dataSource);
-    const helpTriggerType = `DS_${toUpper(type.type)}`;
     const formProps = {
       fields,
       type,
@@ -117,14 +115,6 @@ class EditDataSource extends React.Component {
 
     return (
       <div className="row" data-test="DataSource">
-        <div className="text-right m-r-10">
-          {HELP_TRIGGER_TYPES[helpTriggerType] && (
-            <HelpTrigger className="f-13" type={helpTriggerType}>
-              Setup Instructions <i className="fa fa-question-circle" aria-hidden="true" />
-              <span className="sr-only">(help)</span>
-            </HelpTrigger>
-          )}
-        </div>
         <div className="text-center m-b-10">
           <img className="p-5" src={`${IMG_ROOT}/${type.type}.png`} alt={type.name} width="64" />
           <h3 className="m-0">{type.name}</h3>

@@ -100,7 +100,7 @@ class TestQueryResultListAPI(BaseTestCase):
 
     def test_add_limit_no_change_for_nonsql(self):
         ds = self.factory.create_data_source(
-            group=self.factory.org.default_group, type="prometheus"
+            group=self.factory.org.default_group, type="results"
         )
         query = self.factory.create_query(query_text="SELECT 5", data_source=ds)
         query_result = self.factory.create_query_result(data_source=ds, query_hash=query.query_hash)

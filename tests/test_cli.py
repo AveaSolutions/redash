@@ -1,12 +1,13 @@
-import mock
 import textwrap
+
+import mock
 from click.testing import CliRunner
 
-from tests import BaseTestCase
-from redash.utils.configuration import ConfigurationContainer
-from redash.query_runner import query_runners
 from redash.cli import manager
 from redash.models import DataSource, Group, Organization, User, db
+from redash.query_runner import query_runners
+from redash.utils.configuration import ConfigurationContainer
+from tests import BaseTestCase
 
 
 class DataSourceCommandTests(BaseTestCase):
@@ -122,8 +123,8 @@ class DataSourceCommandTests(BaseTestCase):
     def test_connection_test(self):
         self.factory.create_data_source(
             name="test1",
-            type="sqlite",
-            options=ConfigurationContainer({"dbpath": "/tmp/test.db"}),
+            type="results",
+            options=ConfigurationContainer({}),
         )
         runner = CliRunner()
         result = runner.invoke(manager, ["ds", "test", "test1"])
@@ -134,11 +135,15 @@ class DataSourceCommandTests(BaseTestCase):
     def test_connection_bad_test(self):
         self.factory.create_data_source(
             name="test1",
-            type="sqlite",
-            options=ConfigurationContainer({"dbpath": __file__}),
+            type="results",
+            options=ConfigurationContainer({}),
         )
         runner = CliRunner()
-        result = runner.invoke(manager, ["ds", "test", "test1"])
+        with mock.patch(
+            "redash.query_runner.query_results.Results.run_query",
+            return_value=(None, "not a database"),
+        ):
+            result = runner.invoke(manager, ["ds", "test", "test1"])
         self.assertTrue(result.exception)
         self.assertEqual(result.exit_code, 1)
         self.assertIn("Failure", result.output)
@@ -299,21 +304,21 @@ class GroupCommandTests(BaseTestCase):
         Type: builtin
         Organization: default
         Permissions: [admin,super_admin]
-        Users: 
+        Users:
         --------------------
         Id: 4
         Name: agroup
         Type: regular
         Organization: default
         Permissions: [list_dashboards]
-        Users: 
+        Users:
         --------------------
         Id: 5
         Name: bgroup
         Type: regular
         Organization: default
         Permissions: [list_dashboards]
-        Users: 
+        Users:
         --------------------
         Id: 2
         Name: default
@@ -327,39 +332,12 @@ class GroupCommandTests(BaseTestCase):
         Type: regular
         Organization: default
         Permissions: [list_dashboards]
-        Users: 
+        Users:
         """
         self.assertMultiLineEqual(result.output, textwrap.dedent(output).lstrip())
 
 
 class OrganizationCommandTests(BaseTestCase):
-    def test_set_google_apps_domains(self):
-        domains = ["example.org", "example.com"]
-        runner = CliRunner()
-        result = runner.invoke(
-            manager, ["org", "set_google_apps_domains", ",".join(domains)]
-        )
-        self.assertFalse(result.exception)
-        self.assertEqual(result.exit_code, 0)
-        db.session.add(self.factory.org)
-        self.assertEqual(self.factory.org.google_apps_domains, domains)
-
-    def test_show_google_apps_domains(self):
-        self.factory.org.settings[Organization.SETTING_GOOGLE_APPS_DOMAINS] = [
-            "example.org",
-            "example.com",
-        ]
-        db.session.add(self.factory.org)
-        db.session.commit()
-        runner = CliRunner()
-        result = runner.invoke(manager, ["org", "show_google_apps_domains"])
-        self.assertFalse(result.exception)
-        self.assertEqual(result.exit_code, 0)
-        output = """
-        Current list of Google Apps domains: example.org, example.com
-        """
-        self.assertMultiLineEqual(result.output, textwrap.dedent(output).lstrip())
-
     def test_list(self):
         self.factory.create_org(name="test", slug="test_org")
         self.factory.create_org(name="Borg", slug="B_org")
@@ -423,19 +401,6 @@ class UserCommandTests(BaseTestCase):
         self.assertEqual(u.name, "Fred Foobar")
         self.assertTrue(u.verify_password("password1"))
         self.assertEqual(u.group_ids, [u.org.default_group.id, u.org.admin_group.id])
-
-    def test_create_googleauth(self):
-        runner = CliRunner()
-        result = runner.invoke(
-            manager,
-            ["users", "create", "foobar@example.com", "Fred Foobar", "--google"],
-        )
-        self.assertFalse(result.exception)
-        self.assertEqual(result.exit_code, 0)
-        u = User.query.filter(User.email == "foobar@example.com").first()
-        self.assertEqual(u.name, "Fred Foobar")
-        self.assertIsNone(u.password_hash)
-        self.assertEqual(u.group_ids, [u.org.default_group.id])
 
     def test_create_bad(self):
         self.factory.create_user(email="foobar@example.com")

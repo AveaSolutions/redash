@@ -1,31 +1,45 @@
 import React from "react";
-import enzyme from "enzyme";
+import { fireEvent, screen } from "@testing-library/react";
 
+import { queryByDataTest, renderOptionsEditor } from "@/testing/rtlUtils";
 import getOptions from "../getOptions";
 import DataLabelsSettings from "./DataLabelsSettings";
 
-function findByTestID(wrapper: any, testId: any) {
-  return wrapper.find(`[data-test="${testId}"]`);
+function changeValue(container: HTMLElement, testId: string, value: string): void {
+  const el = queryByDataTest(container, testId);
+  if (!el) {
+    throw new Error(`Missing [data-test="${testId}"]`);
+  }
+  const input =
+    el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el : el.querySelector("input, textarea");
+  if (!input) {
+    throw new Error(`Missing input under [data-test="${testId}"]`);
+  }
+  fireEvent.change(input, { target: { value } });
 }
 
-function mount(options: any, done: any) {
+function setInputChecked(testId: string, checked: boolean): void {
+  const el = screen.getByTestId(testId);
+  const input = el instanceof HTMLInputElement ? el : el.querySelector("input");
+  if (!input) {
+    throw new Error(`Missing input for [data-test="${testId}"]`);
+  }
+  if ((input as HTMLInputElement).checked !== checked) {
+    fireEvent.click(input);
+  }
+}
+
+function renderEditor(options: any, done: () => void) {
   options = getOptions(options);
-  return enzyme.mount(
-    <DataLabelsSettings
-      visualizationName="Test"
-      data={{ columns: [], rows: [] }}
-      options={options}
-      onOptionsChange={changedOptions => {
-        expect(changedOptions).toMatchSnapshot();
-        done();
-      }}
-    />
+  return renderOptionsEditor(
+    <DataLabelsSettings visualizationName="Test" data={{ columns: [], rows: [] }} options={options} />,
+    done
   );
 }
 
 describe("Visualizations -> Chart -> Editor -> Data Labels Settings", () => {
   test("Sets Show Data Labels option", done => {
-    const el = mount(
+    renderEditor(
       {
         globalSeriesType: "column",
         showDataLabels: false,
@@ -33,14 +47,11 @@ describe("Visualizations -> Chart -> Editor -> Data Labels Settings", () => {
       done
     );
 
-    findByTestID(el, "Chart.DataLabels.ShowDataLabels")
-      .last()
-      .find("input")
-      .simulate("change", { target: { checked: true } });
+    setInputChecked("Chart.DataLabels.ShowDataLabels", true);
   });
 
   test("Changes number format", done => {
-    const el = mount(
+    const { container } = renderEditor(
       {
         globalSeriesType: "column",
         numberFormat: "0[.]0000",
@@ -48,13 +59,11 @@ describe("Visualizations -> Chart -> Editor -> Data Labels Settings", () => {
       done
     );
 
-    findByTestID(el, "Chart.DataLabels.NumberFormat")
-      .last()
-      .simulate("change", { target: { value: "0.00" } });
+    changeValue(container, "Chart.DataLabels.NumberFormat", "0.00");
   });
 
   test("Changes percent values format", done => {
-    const el = mount(
+    const { container } = renderEditor(
       {
         globalSeriesType: "column",
         percentFormat: "0[.]00%",
@@ -62,13 +71,11 @@ describe("Visualizations -> Chart -> Editor -> Data Labels Settings", () => {
       done
     );
 
-    findByTestID(el, "Chart.DataLabels.PercentFormat")
-      .last()
-      .simulate("change", { target: { value: "0.0%" } });
+    changeValue(container, "Chart.DataLabels.PercentFormat", "0.0%");
   });
 
   test("Changes date/time format", done => {
-    const el = mount(
+    const { container } = renderEditor(
       {
         globalSeriesType: "column",
         dateTimeFormat: "YYYY-MM-DD HH:mm:ss",
@@ -76,13 +83,11 @@ describe("Visualizations -> Chart -> Editor -> Data Labels Settings", () => {
       done
     );
 
-    findByTestID(el, "Chart.DataLabels.DateTimeFormat")
-      .last()
-      .simulate("change", { target: { value: "YYYY MMM DD" } });
+    changeValue(container, "Chart.DataLabels.DateTimeFormat", "YYYY MMM DD");
   });
 
   test("Changes data labels format", done => {
-    const el = mount(
+    const { container } = renderEditor(
       {
         globalSeriesType: "column",
         textFormat: null,
@@ -90,8 +95,6 @@ describe("Visualizations -> Chart -> Editor -> Data Labels Settings", () => {
       done
     );
 
-    findByTestID(el, "Chart.DataLabels.TextFormat")
-      .last()
-      .simulate("change", { target: { value: "{{ @@x }} :: {{ @@y }} / {{ @@yPercent }}" } });
+    changeValue(container, "Chart.DataLabels.TextFormat", "{{ @@x }} :: {{ @@y }} / {{ @@yPercent }}");
   });
 });

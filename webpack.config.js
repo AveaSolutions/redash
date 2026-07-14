@@ -2,13 +2,9 @@
 
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const WebpackBuildNotifierPlugin = require("webpack-build-notifier");
-const ManifestPlugin = require("webpack-manifest-plugin");
+const { WebpackManifestPlugin } = require("webpack-manifest-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const LessPluginAutoPrefix = require("less-plugin-autoprefix");
-const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
-  .BundleAnalyzerPlugin;
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 
 const path = require("path");
@@ -72,7 +68,7 @@ const config = {
   },
   output: {
     path: path.join(basePath, "./dist"),
-    filename: isProduction ? "[name].[chunkhash].js" : "[name].js",
+    filename: isProduction ? "[name].[contenthash].js" : "[name].js",
     publicPath: staticPath
   },
   resolve: {
@@ -81,12 +77,15 @@ const config = {
     alias: {
       "@": appPath,
       extensions: extensionPath
+    },
+    fallback: {
+      util: require.resolve("util/"),
+      url: require.resolve("url/")
     }
   },
   plugins: [
-    new WebpackBuildNotifierPlugin({ title: "Redash" }),
     // bundle only default `moment` locale (`en`)
-    new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /en/),
+    new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /en/),
     new HtmlWebpackPlugin({
       template: "./client/app/index.html",
       filename: "index.html",
@@ -96,26 +95,26 @@ const config = {
       baseHref,
       title: htmlTitle
     }),
-    new HtmlWebpackPlugin({
-      template: "./client/app/multi_org.html",
-      filename: "multi_org.html",
-      excludeChunks: ["server"]
-    }),
     isProduction &&
       new MiniCssExtractPlugin({
-        filename: "[name].[chunkhash].css"
+        filename: "[name].[contenthash].css"
       }),
-    new ManifestPlugin({
+    new WebpackManifestPlugin({
       fileName: "asset-manifest.json",
       publicPath: ""
     }),
-    new CopyWebpackPlugin([
-      { from: "client/app/assets/robots.txt" },
-      { from: "client/app/unsupported.html" },
-      { from: "client/app/unsupportedRedirect.js" },
-      { from: "client/app/assets/css/*.css", to: "styles/", flatten: true },
-      { from: "client/app/assets/fonts", to: "fonts/" }
-    ]),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: "client/app/assets/robots.txt" },
+        { from: "client/app/unsupported.html" },
+        { from: "client/app/unsupportedRedirect.js" },
+        {
+          from: "client/app/assets/css/*.css",
+          to: "styles/[name][ext]"
+        },
+        { from: "client/app/assets/fonts", to: "fonts/" }
+      ]
+    }),
     isHotReloadingEnabled && new ReactRefreshWebpackPlugin({ overlay: false })
   ].filter(Boolean),
   optimization: {
@@ -128,6 +127,12 @@ const config = {
   module: {
     rules: [
       {
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
+      {
         test: /\.(t|j)sx?$/,
         exclude: /node_modules/,
         use: [
@@ -138,18 +143,13 @@ const config = {
                 isHotReloadingEnabled && require.resolve("react-refresh/babel")
               ].filter(Boolean)
             }
-          },
-          require.resolve("eslint-loader")
+          }
         ]
       },
       {
         test: /\.html$/,
-        exclude: [/node_modules/, /index\.html/, /multi_org\.html/],
-        use: [
-          {
-            loader: "raw-loader"
-          }
-        ]
+        exclude: [/node_modules/, /index\.html/],
+        type: "asset/source"
       },
       {
         test: /\.css$/,
@@ -160,7 +160,7 @@ const config = {
           {
             loader: "css-loader",
             options: {
-              minimize: process.env.NODE_ENV === "production"
+              sourceMap: !isProduction
             }
           }
         ]
@@ -174,61 +174,59 @@ const config = {
           {
             loader: "css-loader",
             options: {
-              minimize: isProduction
+              sourceMap: !isProduction
+            }
+          },
+          {
+            loader: "postcss-loader",
+            options: {
+              postcssOptions: {
+                plugins: ["autoprefixer"]
+              },
+              sourceMap: !isProduction
             }
           },
           {
             loader: "less-loader",
             options: {
-              plugins: [
-                new LessPluginAutoPrefix({ browsers: ["last 3 versions"] })
-              ],
-              javascriptEnabled: true
+              lessOptions: {
+                javascriptEnabled: true,
+                math: "always"
+              },
+              sourceMap: false
             }
           }
         ]
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-        use: [
-          {
-            loader: "file-loader",
-            options: {
-              context: path.resolve(appPath, "./assets/images/"),
-              outputPath: "images/",
-              name: "[path][name].[ext]"
-            }
-          }
-        ]
+        type: "asset/resource",
+        generator: {
+          filename: "images/[path][name][ext]"
+        }
       },
       {
         test: /\.geo\.json$/,
-        type: "javascript/auto",
-        use: [
-          {
-            loader: "file-loader",
-            options: {
-              outputPath: "data/",
-              name: "[hash:7].[name].[ext]"
-            }
-          }
-        ]
+        type: "asset/resource",
+        generator: {
+          filename: "data/[hash:7][name][ext]"
+        }
       },
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-        use: [
-          {
-            loader: "url-loader",
-            options: {
-              limit: 10000,
-              name: "fonts/[name].[hash:7].[ext]"
-            }
+        type: "asset",
+        parser: {
+          dataUrlCondition: {
+            maxSize: 10000
           }
-        ]
+        },
+        generator: {
+          filename: "fonts/[name].[hash:7][ext]"
+        }
       }
     ]
   },
-  devtool: isProduction ? "source-map" : "cheap-eval-module-source-map",
+  devtool: isProduction ? "source-map" : "eval-cheap-module-source-map",
   stats: {
     children: false,
     modules: false,
@@ -238,14 +236,19 @@ const config = {
     ignored: /\.sw.$/
   },
   devServer: {
-    inline: true,
-    index: "/static/index.html",
+    devMiddleware: {
+      publicPath: staticPath,
+      index: "/static/index.html",
+      stats: {
+        modules: false,
+        chunkModules: false
+      }
+    },
     historyApiFallback: {
       index: "/static/index.html",
       rewrites: [{ from: /./, to: "/static/index.html" }]
     },
-    contentBase: false,
-    publicPath: staticPath,
+    static: false,
     proxy: [
       {
         context: [
@@ -254,8 +257,7 @@ const config = {
           "/invite",
           "/setup",
           "/status.json",
-          "/api",
-          "/oauth"
+          "/api"
         ],
         target: redashBackend + "/",
         changeOrigin: false,
@@ -271,10 +273,7 @@ const config = {
         secure: false
       }
     ],
-    stats: {
-      modules: false,
-      chunkModules: false
-    },
+    client: isHotReloadingEnabled ? { overlay: false } : undefined,
     hot: isHotReloadingEnabled
   },
   performance: {
@@ -284,10 +283,6 @@ const config = {
 
 if (process.env.DEV_SERVER_HOST) {
   config.devServer.host = process.env.DEV_SERVER_HOST;
-}
-
-if (process.env.BUNDLE_ANALYZER) {
-  config.plugins.push(new BundleAnalyzerPlugin());
 }
 
 module.exports = maybeApplyOverrides(config);

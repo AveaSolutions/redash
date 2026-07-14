@@ -1,0 +1,13 @@
+{
+  "exported_at": "2026-07-13T15:53:02.978111+00:00",
+  "branch": "rcm-security-patches-2",
+  "total_open": 47,
+  "by_ecosystem": {
+    "pip": 7,
+    "npm": 40
+  },
+  "by_scope": {
+    "runtime": 26,
+    "development": 21
+  }
+}

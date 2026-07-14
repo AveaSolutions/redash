@@ -4,9 +4,8 @@ import React, { useEffect } from "react";
 import Alert from "antd/lib/alert";
 import Link from "@/components/Link";
 import routeWithUserSession from "@/components/ApplicationArea/routeWithUserSession";
-import EmptyState, { EmptyStateHelpMessage } from "@/components/empty-state/EmptyState";
+import EmptyState from "@/components/empty-state/EmptyState";
 import DynamicComponent from "@/components/DynamicComponent";
-import BeaconConsent from "@/components/BeaconConsent";
 import PlainButton from "@/components/PlainButton";
 
 import { axios } from "@/services/axios";
@@ -81,7 +80,6 @@ export default function Home() {
             header="Welcome to Redash 👋"
             description="Connect to any data source, easily visualize and share your data"
             illustration="dashboard"
-            helpMessage={<EmptyStateHelpMessage helpTriggerType="GETTING_STARTED" />}
             showDashboardStep
             showInviteStep
             onboardingMode
@@ -89,7 +87,6 @@ export default function Home() {
         </DynamicComponent>
         <DynamicComponent name="HomeExtra" />
         <DashboardAndQueryFavoritesList />
-        <BeaconConsent />
       </div>
     </div>
   );

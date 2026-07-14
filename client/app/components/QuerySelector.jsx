@@ -33,7 +33,7 @@ export default function QuerySelector(props) {
   const placeholder = "Search a query by name";
   const clearIcon = (
     <i
-      className="fa fa-times hide-in-percy"
+      className="fa fa-times"
       role="button"
       tabIndex={0}
       aria-label="Clear"
@@ -42,7 +42,7 @@ export default function QuerySelector(props) {
   );
   const spinIcon = (
     <span role="status" aria-live="polite" aria-relevant="additions removals">
-      <i className={cx("fa fa-spinner fa-pulse hide-in-percy", { hidden: !searching })} aria-hidden="true" />
+      <i className={cx("fa fa-spinner fa-pulse", { hidden: !searching })} aria-hidden="true" />
       <span className="sr-only">Searching...</span>
     </span>
   );

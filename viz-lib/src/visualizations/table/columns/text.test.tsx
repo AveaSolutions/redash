@@ -1,30 +1,35 @@
 import React from "react";
-import enzyme from "enzyme";
+import { fireEvent, screen } from "@testing-library/react";
 
+import { queryByDataTest, renderColumnEditor } from "@/testing/rtlUtils";
 import Column from "./text";
 
-function findByTestID(wrapper: any, testId: any) {
-  return wrapper.find(`[data-test="${testId}"]`);
+function setInputChecked(testId: string, checked: boolean): void {
+  const el = screen.getByTestId(testId);
+  const input = el instanceof HTMLInputElement ? el : el.querySelector("input");
+  if (!input) {
+    throw new Error(`Missing input for [data-test="${testId}"]`);
+  }
+  if ((input as HTMLInputElement).checked !== checked) {
+    fireEvent.click(input);
+  }
 }
 
-function mount(column: any, done: any) {
-  return enzyme.mount(
+function renderEditor(column: any, done: () => void) {
+  return renderColumnEditor(
     <Column.Editor
       // @ts-expect-error ts-migrate(2322) FIXME: Type '{ visualizationName: string; column: any; on... Remove this comment to see the full error message
       visualizationName="Test"
       column={column}
-      onChange={changedColumn => {
-        expect(changedColumn).toMatchSnapshot();
-        done();
-      }}
-    />
+    />,
+    done
   );
 }
 
 describe("Visualizations -> Table -> Columns -> Text", () => {
   describe("Editor", () => {
     test("Enables HTML content", done => {
-      const el = mount(
+      renderEditor(
         {
           name: "a",
           allowHTML: false,
@@ -33,14 +38,11 @@ describe("Visualizations -> Table -> Columns -> Text", () => {
         done
       );
 
-      findByTestID(el, "Table.ColumnEditor.Text.AllowHTML")
-        .last()
-        .find("input")
-        .simulate("change", { target: { checked: true } });
+      setInputChecked("Table.ColumnEditor.Text.AllowHTML", true);
     });
 
     test("Enables highlight links option", done => {
-      const el = mount(
+      renderEditor(
         {
           name: "a",
           allowHTML: true,
@@ -49,10 +51,7 @@ describe("Visualizations -> Table -> Columns -> Text", () => {
         done
       );
 
-      findByTestID(el, "Table.ColumnEditor.Text.HighlightLinks")
-        .last()
-        .find("input")
-        .simulate("change", { target: { checked: true } });
+      setInputChecked("Table.ColumnEditor.Text.HighlightLinks", true);
     });
   });
 });

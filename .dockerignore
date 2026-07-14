@@ -9,7 +9,6 @@ venv/
 /.codeclimate.yml
 /.coverage
 /coverage.xml
-/.circleci/
 /.github/
 /netlify.toml
 /setup/

@@ -1,17 +1,67 @@
+import { fireEvent } from "@testing-library/react";
 import { after } from "lodash";
 import React from "react";
-import enzyme from "enzyme";
+import { screen } from "@testing-library/react";
 
+import {
+  queryByDataTest,
+  renderOptionsEditor,
+} from "@/testing/rtlUtils";
 import getOptions from "../getOptions";
 import ColorsSettings from "./ColorsSettings";
 
-function findByTestID(wrapper: any, testId: any) {
-  return wrapper.find(`[data-test="${testId}"]`);
+function openSelect(container: HTMLElement, testId: string): void {
+  const wrapper = queryByDataTest(container, testId);
+  const combobox = wrapper?.querySelector('[role="combobox"]');
+  if (!combobox) {
+    throw new Error(`Missing combobox under [data-test="${testId}"]`);
+  }
+  fireEvent.mouseDown(combobox);
 }
 
-function mount(options: any, done: any) {
+function clickColorPickerTrigger(container: HTMLElement, seriesKey: string): void {
+  const rows = container.querySelectorAll("tr");
+  for (const row of rows) {
+    if (row.textContent?.includes(seriesKey)) {
+      const trigger = row.querySelector(".color-picker-trigger");
+      if (trigger) {
+        fireEvent.click(trigger);
+        return;
+      }
+    }
+  }
+  throw new Error(`Missing color picker trigger for "${seriesKey}"`);
+}
+
+function clickColorPickerTriggerAt(container: HTMLElement, index: number): void {
+  const triggers = container.querySelectorAll(".color-picker-trigger");
+  const trigger = triggers[index];
+  if (!trigger) {
+    throw new Error(`Missing color picker trigger at index ${index}`);
+  }
+  fireEvent.click(trigger);
+}
+
+function clickSelectOption(testId: string): void {
+  fireEvent.click(screen.getByTestId(testId));
+}
+
+function changeColorPickerValue(value: string, submit = false): void {
+  const pickers = screen.getAllByTestId("ColorPicker");
+  const picker = pickers[pickers.length - 1];
+  const input = picker.querySelector("input");
+  if (!input) {
+    throw new Error('Missing input under [data-test="ColorPicker"]');
+  }
+  fireEvent.change(input, { target: { value } });
+  if (submit) {
+    fireEvent.keyDown(input, { key: "Enter", code: "Enter" });
+  }
+}
+
+function renderEditor(options: any, done?: () => void) {
   options = getOptions(options);
-  return enzyme.mount(
+  return renderOptionsEditor(
     <ColorsSettings
       visualizationName="Test"
       data={{
@@ -22,18 +72,16 @@ function mount(options: any, done: any) {
         rows: [{ a: "v", b: 3.14 }],
       }}
       options={options}
-      onOptionsChange={(changedOptions: any) => {
-        expect(changedOptions).toMatchSnapshot();
-        done();
-      }}
-    />
+      onOptionsChange={() => {}}
+    />,
+    done
   );
 }
 
 describe("Visualizations -> Chart -> Editor -> Colors Settings", () => {
   describe("for pie", () => {
     test("Changes series color", done => {
-      const el = mount(
+      const { container } = renderEditor(
         {
           globalSeriesType: "pie",
           columnMapping: { a: "x", b: "y" },
@@ -41,20 +89,14 @@ describe("Visualizations -> Chart -> Editor -> Colors Settings", () => {
         done
       );
 
-      findByTestID(el, "Chart.Series.v.Color")
-        .find(".color-picker-trigger")
-        .last()
-        .simulate("click");
-      findByTestID(el, "ColorPicker")
-        .last()
-        .find("input")
-        .simulate("change", { target: { value: "red" } });
+      clickColorPickerTrigger(container, "v");
+      changeColorPickerValue("red");
     });
   });
 
   describe("for heatmap", () => {
     test("Changes color scheme", done => {
-      const el = mount(
+      const { container } = renderEditor(
         {
           globalSeriesType: "heatmap",
           columnMapping: { a: "x", b: "y" },
@@ -62,16 +104,12 @@ describe("Visualizations -> Chart -> Editor -> Colors Settings", () => {
         done
       );
 
-      findByTestID(el, "Chart.Colors.Heatmap.ColorScheme")
-        .last()
-        .simulate("mouseDown");
-      findByTestID(el, "Chart.Colors.Heatmap.ColorScheme.Blues")
-        .last()
-        .simulate("click");
+      openSelect(container, "Chart.Colors.Heatmap.ColorScheme");
+      clickSelectOption("Chart.Colors.Heatmap.ColorScheme.Blues");
     });
 
     test("Sets custom color scheme", done => {
-      const el = mount(
+      const { container } = renderEditor(
         {
           globalSeriesType: "heatmap",
           columnMapping: { a: "x", b: "y" },
@@ -80,29 +118,17 @@ describe("Visualizations -> Chart -> Editor -> Colors Settings", () => {
         after(2, done)
       ); // we will perform 2 actions, so call `done` after all of them completed
 
-      findByTestID(el, "Chart.Colors.Heatmap.MinColor")
-        .find(".color-picker-trigger")
-        .last()
-        .simulate("click");
-      findByTestID(el, "ColorPicker")
-        .last()
-        .find("input")
-        .simulate("change", { target: { value: "yellow" } });
+      clickColorPickerTriggerAt(container, 0);
+      changeColorPickerValue("yellow", true);
 
-      findByTestID(el, "Chart.Colors.Heatmap.MaxColor")
-        .find(".color-picker-trigger")
-        .last()
-        .simulate("click");
-      findByTestID(el, "ColorPicker")
-        .last()
-        .find("input")
-        .simulate("change", { target: { value: "red" } });
+      clickColorPickerTriggerAt(container, 1);
+      changeColorPickerValue("red", true);
     });
   });
 
   describe("for all except of pie and heatmap", () => {
     test("Changes series color", done => {
-      const el = mount(
+      const { container } = renderEditor(
         {
           globalSeriesType: "column",
           columnMapping: { a: "x", b: "y" },
@@ -110,15 +136,8 @@ describe("Visualizations -> Chart -> Editor -> Colors Settings", () => {
         done
       );
 
-      findByTestID(el, "Chart.Series.b.Color")
-        .find(".color-picker-trigger")
-        .last()
-        .simulate("click");
-
-      findByTestID(el, "ColorPicker")
-        .last()
-        .find("input")
-        .simulate("change", { target: { value: "red" } });
+      clickColorPickerTrigger(container, "b");
+      changeColorPickerValue("red");
     });
   });
 });

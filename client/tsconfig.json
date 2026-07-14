@@ -21,8 +21,9 @@
     "paths": {
       "@/*": ["./app/*"]
     },
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["node"]
   },
   "include": ["app/**/*"],
-  "exclude": ["dist"]
+  "exclude": ["dist", "app/**/*.test.js", "app/**/*.test.ts", "app/**/*.test.tsx"]
 }

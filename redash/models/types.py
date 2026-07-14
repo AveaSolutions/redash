@@ -22,6 +22,17 @@ class Configuration(TypeDecorator):
         return ConfigurationContainer.from_json(value)
 
 
+def _encrypted_db_value_to_str(value):
+    """Coerce DB driver values for Fernet decrypt (psycopg2 2.9+ may return memoryview)."""
+    if value is None:
+        return value
+    if isinstance(value, memoryview):
+        value = value.tobytes()
+    if isinstance(value, bytes):
+        value = value.decode("utf-8")
+    return value
+
+
 class EncryptedConfiguration(EncryptedType):
     def process_bind_param(self, value, dialect):
         return super(EncryptedConfiguration, self).process_bind_param(
@@ -29,6 +40,7 @@ class EncryptedConfiguration(EncryptedType):
         )
 
     def process_result_value(self, value, dialect):
+        value = _encrypted_db_value_to_str(value)
         return ConfigurationContainer.from_json(
             super(EncryptedConfiguration, self).process_result_value(value, dialect)
         )

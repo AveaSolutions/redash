@@ -3,10 +3,7 @@ import AceEditor from "react-ace";
 import ace from "ace-builds";
 
 import "ace-builds/src-noconflict/ext-language_tools";
-import "ace-builds/src-noconflict/mode-json";
-import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/mode-sql";
-import "ace-builds/src-noconflict/mode-yaml";
 import "ace-builds/src-noconflict/theme-textmate";
 import "ace-builds/src-noconflict/ext-searchbox";
 
@@ -22,10 +19,7 @@ function defineDummySnippets(mode) {
   });
 }
 
-defineDummySnippets("python");
 defineDummySnippets("sql");
-defineDummySnippets("json");
-defineDummySnippets("yaml");
 
 function buildTableColumnKeywords(table) {
   const keywords = [];

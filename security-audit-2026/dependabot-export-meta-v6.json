@@ -1,0 +1,22 @@
+{
+  "exported_at": "2026-07-13T18:30:00+00:00",
+  "source": "gh api repos/AveaSolutions/redash/dependabot/alerts --paginate",
+  "default_branch": "rcm-security-patches",
+  "local_branch": "rcm-security-patches",
+  "total_open": 125,
+  "poetry_lock_open": 91,
+  "non_poetry_open": 34,
+  "severity_open": {
+    "critical": 5,
+    "high": 48,
+    "medium": 61,
+    "low": 11
+  },
+  "severity_non_poetry": {
+    "critical": 2,
+    "high": 15,
+    "medium": 16,
+    "low": 1
+  },
+  "notes": "125→34 after excluding poetry.lock (master branch only). Fresh Dependabot rescan on 2026-07-13 re-touched all 91 poetry alerts."
+}
