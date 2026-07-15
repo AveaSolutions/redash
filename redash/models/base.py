@@ -1,53 +1,54 @@
 import functools
 
-from flask_sqlalchemy import BaseQuery, SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy.query import Query
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import object_session
-from sqlalchemy.pool import NullPool
-from sqlalchemy_searchable import SearchQueryMixin, make_searchable, vectorizer
+from sqlalchemy.sql.sqltypes import INTEGER
+from sqlalchemy_searchable import SearchQueryMixin, vectorizer
 
 from redash import settings
-from redash.utils import json_dumps
+
+db = SQLAlchemy(session_options={"expire_on_commit": False})
 
 
-class RedashSQLAlchemy(SQLAlchemy):
-    def apply_driver_hacks(self, app, info, options):
-        options.update(json_serializer=json_dumps)
-        if settings.SQLALCHEMY_ENABLE_POOL_PRE_PING:
-            options.update(pool_pre_ping=True)
-        return super(RedashSQLAlchemy, self).apply_driver_hacks(app, info, options)
-
-    def apply_pool_defaults(self, app, options):
-        super(RedashSQLAlchemy, self).apply_pool_defaults(app, options)
-        if settings.SQLALCHEMY_ENABLE_POOL_PRE_PING:
-            options["pool_pre_ping"] = True
-        if settings.SQLALCHEMY_DISABLE_POOL:
-            options["poolclass"] = NullPool
-            # Remove options NullPool does not support:
-            options.pop("max_overflow", None)
-        return options
+class _LegacyEntityZero(object):
+    def __init__(self, model_class):
+        self.class_ = model_class
 
 
-db = RedashSQLAlchemy(session_options={"expire_on_commit": False})
-# Make sure the SQLAlchemy mappers are all properly configured first.
-# This is required by SQLAlchemy-Searchable as it adds DDL listeners
-# on the configuration phase of models.
-db.configure_mappers()
-
-# listen to a few database events to set up functions, trigger updates
-# and indexes for the full text search
-make_searchable(options={"regconfig": "pg_catalog.simple"})
+class _LegacyQueryEntity(object):
+    def __init__(self, model_class):
+        self.entity_zero = _LegacyEntityZero(model_class)
 
 
-class SearchBaseQuery(BaseQuery, SearchQueryMixin):
+class SearchBaseQuery(Query, SearchQueryMixin):
     """
     The SQA query class to use when full text search is wanted.
     """
 
+    @property
+    def _entities(self):
+        # SQLAlchemy-Searchable 0.10.6 expects the legacy Query._entities API
+        # removed in Flask-SQLAlchemy 3 / SQLAlchemy 1.4.
+        entities = []
+        for description in self.column_descriptions:
+            entity = description.get("entity")
+            if entity is not None:
+                entities.append(_LegacyQueryEntity(entity))
+        if not entities:
+            expr = self.column_descriptions[0].get("expr")
+            if expr is not None:
+                entities.append(_LegacyQueryEntity(expr))
+        return entities
 
-@vectorizer(db.Integer)
-def integer_vectorizer(column):
+
+def _integer_vectorizer(column):
     return db.func.cast(column, db.Text)
+
+
+vectorizer(db.Integer)(_integer_vectorizer)
+vectorizer(INTEGER)(_integer_vectorizer)
 
 
 @vectorizer(postgresql.UUID)

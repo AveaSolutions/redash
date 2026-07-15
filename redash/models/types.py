@@ -41,9 +41,13 @@ class EncryptedConfiguration(EncryptedType):
 
     def process_result_value(self, value, dialect):
         value = _encrypted_db_value_to_str(value)
-        return ConfigurationContainer.from_json(
-            super(EncryptedConfiguration, self).process_result_value(value, dialect)
+        if not value:
+            return ConfigurationContainer.from_json(None)
+        # SQLAlchemy-Utils 0.41 only enters the decrypt path for bytes values.
+        decrypted = super(EncryptedConfiguration, self).process_result_value(
+            value.encode("utf-8"), dialect
         )
+        return ConfigurationContainer.from_json(decrypted)
 
 
 # XXX replace PseudoJSON and MutableDict with real JSON field

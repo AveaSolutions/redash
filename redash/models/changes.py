@@ -52,7 +52,9 @@ class ChangeTrackingMixin(object):
     _clean_values = None
 
     def __init__(self, *a, **kw):
+        object.__setattr__(self, "_initializing", True)
         super(ChangeTrackingMixin, self).__init__(*a, **kw)
+        object.__setattr__(self, "_initializing", False)
         self.record_changes(self.user)
 
     def prep_cleanvalues(self):
@@ -63,6 +65,10 @@ class ChangeTrackingMixin(object):
             self._clean_values[col.name] = None
 
     def __setattr__(self, key, value):
+        if self.__dict__.get("_initializing") or not hasattr(self, "_sa_instance_state"):
+            super(ChangeTrackingMixin, self).__setattr__(key, value)
+            return
+
         if self._clean_values is None:
             self.prep_cleanvalues()
         for attr in inspect(self.__class__).column_attrs:
@@ -73,6 +79,9 @@ class ChangeTrackingMixin(object):
         super(ChangeTrackingMixin, self).__setattr__(key, value)
 
     def record_changes(self, changed_by):
+        if self._clean_values is None:
+            self.prep_cleanvalues()
+
         db.session.add(self)
         db.session.flush()
         changes = {}

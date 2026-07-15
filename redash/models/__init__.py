@@ -109,6 +109,8 @@ class DataSource(BelongsToOrgMixin, db.Model):
     __table_args__ = (db.Index("data_sources_org_id_name", "org_id", "name"),)
 
     def __eq__(self, other):
+        if other is None:
+            return False
         return self.id == other.id
 
     def __hash__(self):
@@ -382,15 +384,24 @@ class QueryResult(db.Model, QueryResultPersistence, BelongsToOrgMixin):
     def store_result(
         cls, org, data_source, query_hash, query, data, run_time, retrieved_at
     ):
+        data_source_id = (
+            data_source.id if hasattr(data_source, "id") else data_source
+        )
         query_result = cls(
             org_id=org,
             query_hash=query_hash,
             query_text=query,
             runtime=run_time,
-            data_source=data_source,
+            data_source_id=data_source_id,
             retrieved_at=retrieved_at,
             data=data,
         )
+
+        existing_data_source = db.session.get(DataSource, data_source_id)
+        if existing_data_source is not None:
+            query_result.data_source = existing_data_source
+        elif hasattr(data_source, "id"):
+            query_result.data_source = data_source
 
         db.session.add(query_result)
         logging.info("Inserted query (%s) data; id=%s", query_hash, query_result.id)
@@ -594,20 +605,20 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
 
     @classmethod
     def all_tags(cls, user, include_drafts=False):
-        queries = cls.all_queries(
+        accessible_queries = cls.all_queries(
             group_ids=user.group_ids, user_id=user.id, include_drafts=include_drafts
         )
 
         tag_column = func.unnest(cls.tags).label("tag")
         usage_count = func.count(1).label("usage_count")
 
-        query = (
+        return (
             db.session.query(tag_column, usage_count)
+            .select_from(cls)
             .group_by(tag_column)
-            .filter(Query.id.in_(queries.options(load_only("id"))))
+            .filter(Query.id.in_(accessible_queries.with_entities(Query.id)))
             .order_by(usage_count.desc())
         )
-        return query
 
     @classmethod
     def by_user(cls, user):
@@ -771,7 +782,7 @@ class Query(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model):
         # TODO: Investigate how big an impact this select-before-update makes.
         queries = Query.query.filter(
             Query.query_hash == query_result.query_hash,
-            Query.data_source == query_result.data_source,
+            Query.data_source_id == query_result.data_source_id,
         )
 
         for q in queries:
@@ -1161,13 +1172,13 @@ class Dashboard(ChangeTrackingMixin, TimestampMixin, BelongsToOrgMixin, db.Model
         tag_column = func.unnest(cls.tags).label("tag")
         usage_count = func.count(1).label("usage_count")
 
-        query = (
+        return (
             db.session.query(tag_column, usage_count)
+            .select_from(cls)
             .group_by(tag_column)
-            .filter(Dashboard.id.in_(dashboards.options(load_only("id"))))
+            .filter(Dashboard.id.in_(dashboards.with_entities(Dashboard.id)))
             .order_by(usage_count.desc())
         )
-        return query
 
     @classmethod
     def favorites(cls, user, base_query=None):
@@ -1514,3 +1525,11 @@ def init_db():
     # XXX remove after fixing User.group_ids
     db.session.commit()
     return default_org, admin_group, default_group
+
+
+# Configure mappers after all models are defined (required for SQLAlchemy 1.4+).
+from sqlalchemy.orm import configure_mappers  # noqa: E402
+from sqlalchemy_searchable import make_searchable  # noqa: E402
+
+make_searchable(options={"regconfig": "pg_catalog.simple"})
+configure_mappers()
