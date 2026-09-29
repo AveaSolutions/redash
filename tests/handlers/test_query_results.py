@@ -5,6 +5,9 @@ from redash.models import db
 from redash.utils import json_dumps
 from redash.handlers.query_results import error_messages
 
+from werkzeug.http import parse_options_header
+from redash.handlers.query_results import content_disposition_filenames
+
 
 class TestQueryResultsCacheHeaders(BaseTestCase):
     def test_uses_cache_headers_for_specific_result(self):
@@ -507,3 +510,52 @@ class TestJobResource(BaseTestCase):
         job = self.make_request("get", f"/api/jobs/{job_id}").json["job"]
         self.assertEqual(job["status"], FAILED)
         self.assertTrue("cancelled" in job["error"])
+
+class TestQueryResultDownloadFilename(BaseTestCase):
+    """End-to-end: the filename the browser receives in Content-Disposition."""
+
+    def _download(self, filetype):
+        query_result = self.factory.create_query_result()
+        query = self.factory.create_query(
+            name="Claim Submissions Totals", latest_query_data=query_result
+        )
+
+        rv = self.make_request(
+            "get",
+            "/api/queries/{}/results/{}.{}".format(query.id, query_result.id, filetype),
+            is_json=False,
+        )
+        self.assertEqual(rv.status_code, 200)
+
+        disposition, options = parse_options_header(rv.headers["Content-Disposition"])
+        expected = "Claim_Submissions_Totals_{}.{}".format(
+            query_result.retrieved_at.strftime("%Y_%m_%d"), filetype
+        )
+        return disposition, options["filename"], expected
+
+    def test_csv_download_filename(self):
+        disposition, filename, expected = self._download("csv")
+        self.assertEqual(disposition, "attachment")
+        self.assertEqual(filename, expected)
+
+    def test_xlsx_download_filename(self):
+        disposition, filename, expected = self._download("xlsx")
+        self.assertEqual(disposition, "attachment")
+        self.assertEqual(filename, expected)
+
+
+class TestContentDispositionFilenames(BaseTestCase):
+    """Unit: the helper must return str values, never bytes."""
+
+    def test_ascii_name_returns_str(self):
+        filenames = content_disposition_filenames("report_2026_09_21.csv")
+        self.assertIsInstance(filenames["filename"], str)
+        self.assertEqual(filenames["filename"], "report_2026_09_21.csv")
+
+    def test_unicode_name_returns_str(self):
+        filenames = content_disposition_filenames("Reclamación_2026_09_21.csv")
+        self.assertIsInstance(filenames["filename"], str)
+        self.assertEqual(filenames["filename"], "Reclamacion_2026_09_21.csv")
+        self.assertEqual(
+            filenames["filename*"], "UTF-8''Reclamaci%C3%B3n_2026_09_21.csv"
+        )
