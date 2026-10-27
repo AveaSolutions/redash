@@ -50,7 +50,7 @@ SQLAlchemy==1.4.54
 SQLAlchemy-Searchable==0.10.6
 # 0.41.2: SQLAlchemy 1.4 support; sort_query removed in 0.37 (vendored in redash.utils.sort_query).
 SQLAlchemy-Utils==0.41.2
-sqlparse==0.5.5
+sqlparse==0.6.0
 sshtunnel==0.1.5
 statsd==3.3.0
 supervisor==4.1.0
